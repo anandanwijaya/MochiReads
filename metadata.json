@@ -1,0 +1,8 @@
+{
+  "name": "MochiReads",
+  "description": "A vibrant digital library and AI-powered story creation platform for children, inspired by Let's Read Asia. Features an extensive book collection and an AI magic lab for instant storytelling.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
