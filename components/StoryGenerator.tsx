@@ -20,7 +20,6 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
   const [error, setError] = useState<string | null>(null);
   const t = (key: any) => getTranslation(language, key);
   
-  // Review state
   const [stage, setStage] = useState<'input' | 'review'>('input');
   const [storyData, setStoryData] = useState<StoryGenerationResult | null>(null);
   const [pageImages, setPageImages] = useState<(string | null)[]>([null, null, null, null, null]);
@@ -38,7 +37,7 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
       setStoryData(result);
       setStage('review');
       
-      // Auto-generate cover
+      // Auto-generate cover using the first page's prompt
       handleGenerateImage(0, result.title + ": " + result.pages[0].imagePrompt);
     } catch (err: any) {
       console.error(err);
@@ -89,36 +88,36 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
     playSound('pop');
 
     try {
-      // 1. Upload all images to Supabase Storage
+      // 1. Upload all generated images to Supabase Storage (images bucket)
       const uploadedAssets = await Promise.all(
         pageImages.map(async (img, idx) => {
           if (img && img.startsWith('data:image')) {
             const fileName = `stories/${Date.now()}-page-${idx}.png`;
             return await uploadImageFromBase64(img, fileName);
           }
-          // Fallback if image wasn't generated
-          return { url: `https://picsum.photos/seed/fallback-${idx}/400/600`, path: '' };
+          // Fallback placeholder if image generation was skipped
+          return { url: `https://picsum.photos/seed/fallback-${Date.now()}-${idx}/400/600`, path: '' };
         })
       );
 
       const finalImageUrls = uploadedAssets.map(asset => asset.url);
       const pagesText = storyData.pages.map(p => p.text);
 
-      // 2. Save to Database
+      // 2. Insert the book into the Database
       const { data, error: dbError } = await supabase
         .from('books')
         .insert([{
           title: storyData.title,
           author: 'The Magic Lab',
           illustrator: 'Gemini AI',
-          description: `A magic story created in the Lab: ${prompt}`,
+          description: `A magical story created in the Lab based on: ${prompt}`,
           cover_image_url: finalImageUrls[0],
           cover_image_path: uploadedAssets[0].path,
           language: language === 'en' ? 'English' : language === 'ms' ? 'Malay' : 'Indonesian',
           level: 1,
           tags: ['Magic Lab', 'AI Story', language.toUpperCase()],
           pages: pagesText,
-          page_images: finalImageUrls, // Use the page_images column
+          page_images: finalImageUrls,
           is_public: true
         }])
         .select()
@@ -127,7 +126,7 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
       if (dbError) throw dbError;
 
       const newBook: Book = {
-        id: data.id,
+        id: data.id.toString(),
         title: data.title,
         author: data.author,
         illustrator: data.illustrator,
@@ -144,8 +143,8 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
       playSound('tada');
       onStoryGenerated(newBook);
     } catch (err: any) {
-      console.error(err);
-      setError('The magic failed to save! ' + (err.message || 'Unknown error'));
+      console.error('Save failed:', err);
+      setError('The magic failed to save! ' + (err.message || 'Check your internet connection.'));
     } finally {
       setIsSaving(false);
     }
@@ -160,7 +159,7 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
 
   if (stage === 'review' && storyData) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+      <div className="w-full max-w-none px-4 sm:px-8 py-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
         <div className="flex items-center justify-between mb-12">
           <button 
             onClick={() => { playSound('pop'); setStage('input'); }}
@@ -172,7 +171,7 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
             Back
           </button>
           <div className="flex flex-col items-center">
-            <h2 className={`text-3xl font-display font-bold text-center ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
+            <h2 className={`text-4xl font-display font-bold text-center ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
               {t('reviewTale')}
             </h2>
           </div>
@@ -180,10 +179,10 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
         </div>
 
         <div className="space-y-12">
-          <div className={`rounded-[2.5rem] p-8 border-4 shadow-sm flex flex-col md:flex-row items-center gap-8 transition-colors ${
+          <div className={`rounded-[2.5rem] p-8 sm:p-12 border-4 shadow-sm flex flex-col md:flex-row items-center gap-8 transition-colors ${
             theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-purple-50'
           }`}>
-            <div className="w-full md:w-1/3 aspect-[3/4] rounded-3xl overflow-hidden bg-slate-50 dark:bg-slate-800 border-4 border-white dark:border-slate-700 shadow-inner relative group">
+            <div className="w-full md:w-1/4 max-w-[300px] aspect-[3/4] rounded-3xl overflow-hidden bg-slate-50 dark:bg-slate-800 border-4 border-white dark:border-slate-700 shadow-inner relative group flex-shrink-0">
               {pageImages[0] ? (
                 <img src={pageImages[0]} className="w-full h-full object-cover" alt="Cover" />
               ) : (
@@ -210,16 +209,16 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
                 type="text"
                 value={storyData.title}
                 onChange={(e) => handleUpdateTitle(e.target.value)}
-                className={`text-4xl font-display font-bold w-full rounded-2xl px-4 py-2 outline-none transition-all border-4 focus:border-purple-500 ${
+                className={`text-4xl sm:text-6xl font-display font-bold w-full rounded-2xl px-4 py-4 outline-none transition-all border-4 focus:border-purple-500 ${
                   theme === 'dark' ? 'bg-slate-800 border-transparent text-white' : 'bg-slate-50 border-transparent text-slate-800'
                 }`}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {storyData.pages.map((page, idx) => (
-              <div key={idx} className={`rounded-[2.5rem] p-6 border-4 shadow-sm flex flex-col gap-6 transition-colors ${
+              <div key={idx} className={`rounded-[2.5rem] p-6 sm:p-8 border-4 shadow-sm flex flex-col gap-6 transition-colors ${
                 theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-50'
               }`}>
                 <div className="flex items-center justify-between">
@@ -250,7 +249,7 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
                 <textarea 
                   value={page.text}
                   onChange={(e) => handleUpdatePageText(idx, e.target.value)}
-                  className={`w-full rounded-2xl p-4 font-medium resize-none h-32 outline-none transition-all border-4 focus:border-purple-500 ${
+                  className={`w-full rounded-2xl p-6 font-medium resize-none h-40 outline-none transition-all border-4 focus:border-purple-500 text-lg ${
                     theme === 'dark' ? 'bg-slate-800 border-transparent text-slate-200' : 'bg-slate-50 border-transparent text-slate-700'
                   }`}
                 />
@@ -274,8 +273,8 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-20">
-      <div className={`rounded-[3rem] shadow-2xl overflow-hidden border-8 p-8 sm:p-16 text-center transition-colors duration-500 ${
+    <div className="w-full max-w-none px-4 sm:px-8 py-20">
+      <div className={`rounded-[3rem] shadow-2xl overflow-hidden border-8 p-8 sm:p-24 text-center transition-colors duration-500 ${
         theme === 'dark' ? 'bg-slate-900 border-slate-800 shadow-purple-900/10' : 'bg-white border-purple-50 shadow-purple-100/50'
       }`}>
         <div className={`w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-10 shadow-inner animate-pulse ${
@@ -284,20 +283,20 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
           <Wand2 size={48} strokeWidth={2.5} />
         </div>
         
-        <h2 className={`text-5xl font-display font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
+        <h2 className={`text-5xl sm:text-7xl lg:text-8xl font-display font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
           {t('magicLab')}
         </h2>
         
-        <p className={`text-xl font-bold mb-12 max-w-xl mx-auto leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+        <p className={`text-xl sm:text-2xl font-bold mb-12 max-w-3xl mx-auto leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
           Tell us a little bit about your hero, and our magic wand will write a whole book for you!
         </p>
 
-        <div className="relative mb-12 group">
+        <div className="relative mb-12 group w-full max-w-6xl mx-auto">
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="..."
-            className={`w-full h-48 p-8 rounded-[2.5rem] border-4 outline-none text-xl font-bold resize-none transition-all ${
+            className={`w-full h-64 p-8 sm:p-12 rounded-[2.5rem] border-4 outline-none text-2xl sm:text-3xl font-bold resize-none transition-all ${
               theme === 'dark' 
                 ? 'bg-slate-800 border-slate-700 text-white focus:border-purple-500 focus:ring-8 focus:ring-purple-900/20' 
                 : 'bg-slate-50 border-slate-100 text-slate-800 focus:border-purple-300 focus:ring-8 focus:ring-purple-500/10'
@@ -307,22 +306,22 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
           <button
             onClick={handleInitialGenerate}
             disabled={isGenerating || !prompt.trim()}
-            className="absolute bottom-6 right-6 bg-purple-600 text-white px-10 py-4 rounded-[2rem] font-black shadow-[0_8px_0_0_#7e22ce] hover:bg-purple-700 hover:translate-y-[2px] active:translate-y-[8px] active:shadow-none transition-all disabled:opacity-50 flex items-center gap-3 text-lg"
+            className="absolute bottom-6 right-6 sm:bottom-10 sm:right-10 bg-purple-600 text-white px-10 py-5 rounded-[2rem] font-black shadow-[0_8px_0_0_#7e22ce] hover:bg-purple-700 hover:translate-y-[2px] active:translate-y-[8px] active:shadow-none transition-all disabled:opacity-50 flex items-center gap-3 text-xl"
           >
             {isGenerating ? <><Loader2 size={24} className="animate-spin" /> {t('magicking')}</> : <><Sparkles size={24} /> {t('letsGo')}</>}
           </button>
         </div>
 
-        {error && <div className="mb-10 p-6 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-[2rem] text-sm font-black border-2 border-red-100 animate-bounce">{error}</div>}
+        {error && <div className="mb-10 p-6 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-[2rem] text-sm font-black border-2 border-red-100 animate-bounce max-w-xl mx-auto">{error}</div>}
 
-        <div className="space-y-6">
-          <p className="text-xs font-black text-purple-400 uppercase tracking-[0.2em]">{t('tryTheseIdeas')}</p>
-          <div className="flex flex-wrap justify-center gap-4">
+        <div className="space-y-8">
+          <p className="text-sm font-black text-purple-400 uppercase tracking-[0.2em]">{t('tryTheseIdeas')}</p>
+          <div className="flex flex-wrap justify-center gap-6">
             {suggestions.map((s, idx) => (
               <button
                 key={idx}
                 onClick={() => { playSound('pop'); setPrompt(s); }}
-                className={`px-6 py-3 rounded-2xl text-sm font-black transition-all border-2 hover:scale-105 ${
+                className={`px-8 py-4 rounded-2xl text-lg font-black transition-all border-2 hover:scale-105 ${
                   theme === 'dark' 
                     ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white' 
                     : 'bg-purple-50 border-purple-100 text-purple-600 hover:bg-purple-100'

@@ -1,17 +1,19 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Book } from '../types';
 import { ChevronLeft, ChevronRight, Volume2, VolumeX, Info, Share2, Download, Sun, Star, Home, PartyPopper, X } from 'lucide-react';
 import { playSound } from './SoundEffects';
+import { supabase, updateReadingProgress } from '../services/supabase';
 
 interface BookReaderProps {
   book: Book;
   theme: 'light' | 'dark';
   onClose: () => void;
+  userId?: string;
+  initialPage?: number;
 }
 
-const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose }) => {
-  const [currentPage, setCurrentPage] = useState(0);
+const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, initialPage = 0 }) => {
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [showThumbnails, setShowThumbnails] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [isReadingAloud, setIsReadingAloud] = useState(false);
@@ -20,6 +22,13 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose }) => {
   
   const totalPages = book.pages.length;
   const progress = ((currentPage + 1) / totalPages) * 100;
+
+  // Track progress when page changes or book finishes
+  useEffect(() => {
+    if (userId) {
+      updateReadingProgress(userId, book.id, currentPage, isDone);
+    }
+  }, [currentPage, isDone, userId, book.id]);
 
   const stopReading = () => {
     synth.cancel();
@@ -92,7 +101,6 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose }) => {
 
   const isDark = theme === 'dark';
 
-  // Get current page image
   const getPageImage = (idx: number) => {
     if (idx === 0) return book.coverImage;
     if (book.pageImages && book.pageImages[idx]) return book.pageImages[idx];
@@ -101,7 +109,6 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose }) => {
 
   return (
     <div className={`fixed inset-0 z-[100] flex flex-col transition-colors duration-300 ${isDark ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900'} overflow-hidden font-sans print:relative print:block print:bg-white`}>
-      {/* Playful Header */}
       <header className={`flex-none flex items-center justify-between px-4 sm:px-6 h-20 border-b-4 z-50 print:hidden ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-purple-50'}`}>
         <div className="flex items-center h-full">
           <button 
@@ -151,7 +158,6 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose }) => {
         </div>
       </header>
 
-      {/* Info Overlay */}
       {showInfo && (
         <div className={`absolute top-24 right-6 z-[110] w-80 rounded-3xl shadow-2xl border-4 p-6 animate-in slide-in-from-top-4 duration-300 print:hidden ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-purple-50'}`}>
           <div className="flex justify-between items-start mb-4">
@@ -179,9 +185,7 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose }) => {
         </div>
       )}
 
-      {/* Reader Content Area */}
       <div className={`flex-1 relative flex flex-col items-center overflow-hidden print:bg-white print:overflow-visible ${isDark ? 'bg-slate-950' : 'bg-[#fdfbff]'}`}>
-        {/* Navigation Arrows */}
         <div className="absolute left-4 sm:left-6 inset-y-0 z-10 hidden lg:flex items-center print:hidden">
           <button 
             onClick={prev}
@@ -201,7 +205,6 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose }) => {
           </button>
         </div>
 
-        {/* Page Area */}
         <div className="w-full h-full flex flex-col items-center justify-center px-4 py-8 lg:py-12 overflow-hidden print:p-0 print:block print:h-auto">
           {isDone ? (
             <div className={`max-w-xl w-full text-center p-8 sm:p-12 rounded-[3rem] shadow-2xl border-8 animate-in fade-in zoom-in duration-500 print:hidden ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-purple-100'}`}>
@@ -245,7 +248,6 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose }) => {
         </div>
       </div>
 
-      {/* Playful Progress Bar & Footer */}
       <footer className={`flex-none z-50 print:hidden ${isDark ? 'bg-slate-950' : 'bg-white'}`}>
         <div className={`w-full h-8 sm:h-10 relative flex items-center ${isDark ? 'bg-slate-900' : 'bg-purple-50'}`}>
           <div className="absolute inset-0 flex items-center px-4">

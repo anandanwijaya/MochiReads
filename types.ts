@@ -14,6 +14,15 @@ export interface Book {
   pageImages?: string[];
 }
 
+export interface ReadingProgressRecord {
+  id: string;
+  user_id: string;
+  book_id: string;
+  current_page: number;
+  is_finished: boolean;
+  last_read_at: string;
+}
+
 export interface StoryGenerationResult {
   title: string;
   pages: {
@@ -26,5 +35,5 @@ export interface StoryGenerationResult {
 export type Category = 'All' | 'Animal Stories' | 'Science' | 'Adventure' | 'Folk Tales' | 'Life Skills';
 export type Level = 'All' | '1' | '2' | '3' | '4' | '5';
 export type LanguageFilter = 'All' | 'English' | 'Malay' | 'Indonesian';
-export type ViewType = 'library' | 'creator' | 'favorites' | 'latest' | 'recommendations';
+export type ViewType = 'library' | 'creator' | 'favorites' | 'latest' | 'recommendations' | 'progress';
 export type AppLanguage = 'en' | 'ms' | 'id';

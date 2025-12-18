@@ -15,7 +15,7 @@ const Hero: React.FC<HeroProps> = ({ onStartCreating, language, theme }) => {
   const t = (key: any) => getTranslation(language, key);
 
   return (
-    <div className={`relative overflow-hidden pt-16 pb-24 px-4 transition-colors duration-500 ${
+    <div className={`relative overflow-hidden pt-16 pb-24 transition-colors duration-500 w-full ${
       theme === 'dark' ? 'bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950' : 'bg-gradient-to-b from-purple-100 via-white to-white'
     }`}>
       {/* Playful Floating Shapes */}
@@ -29,7 +29,8 @@ const Hero: React.FC<HeroProps> = ({ onStartCreating, language, theme }) => {
         theme === 'dark' ? 'bg-slate-800' : 'bg-violet-200'
       }`} />
 
-      <div className="max-w-5xl mx-auto text-center relative z-10 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+      {/* Content Container - Constrained and Centered */}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 text-center relative z-10 animate-in fade-in slide-in-from-bottom-10 duration-1000">
         <div className={`inline-flex items-center gap-2 px-6 py-2 rounded-full text-sm font-black mb-8 animate-bounce shadow-sm border-2 ${
           theme === 'dark' ? 'bg-slate-800 text-purple-400 border-slate-700' : 'bg-fuchsia-100 text-fuchsia-600 border-fuchsia-50'
         }`}>
@@ -37,7 +38,7 @@ const Hero: React.FC<HeroProps> = ({ onStartCreating, language, theme }) => {
           <span>{t('adventureAwaits')}</span>
         </div>
         
-        <h1 className={`text-6xl sm:text-8xl font-display font-bold mb-6 leading-tight ${
+        <h1 className={`text-6xl sm:text-8xl lg:text-9xl font-display font-bold mb-6 leading-tight ${
           theme === 'dark' ? 'text-white' : 'text-slate-800'
         }`}>
           {t('heroTitle').split('&')[0]} <br />
@@ -46,7 +47,7 @@ const Hero: React.FC<HeroProps> = ({ onStartCreating, language, theme }) => {
           </span>
         </h1>
         
-        <p className={`text-2xl mb-12 max-w-2xl mx-auto font-medium leading-relaxed ${
+        <p className={`text-2xl sm:text-3xl mb-12 max-w-4xl mx-auto font-medium leading-relaxed ${
           theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
         }`}>
           {t('heroSubtitle')}
@@ -54,7 +55,7 @@ const Hero: React.FC<HeroProps> = ({ onStartCreating, language, theme }) => {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           <button 
-            onClick={() => { playSound('pop'); window.scrollTo({ top: 650, behavior: 'smooth' }); }}
+            onClick={() => { playSound('pop'); window.scrollTo({ top: 750, behavior: 'smooth' }); }}
             className="group px-10 py-5 bg-purple-600 text-white rounded-[2rem] font-black text-xl hover:bg-purple-700 transition-all flex items-center gap-3 w-full sm:w-auto justify-center shadow-[0_8px_0_0_#7e22ce] hover:translate-y-[2px] hover:shadow-[0_6px_0_0_#7e22ce] active:translate-y-[6px] active:shadow-none"
           >
             {t('startReading')}
@@ -74,19 +75,19 @@ const Hero: React.FC<HeroProps> = ({ onStartCreating, language, theme }) => {
           </button>
         </div>
 
-        <div className="mt-20 grid grid-cols-3 max-w-lg mx-auto gap-8">
+        <div className="mt-20 grid grid-cols-3 max-w-4xl mx-auto gap-8 px-4">
           {[
             { label: t('stories'), value: '500+', color: 'purple' },
             { label: t('languages'), value: '20+', color: 'fuchsia' },
             { label: t('friends'), value: '10k+', color: 'indigo' }
           ].map(stat => (
-            <div key={stat.label} className={`text-center p-4 rounded-3xl border-2 shadow-sm transition-transform hover:-translate-y-1 ${
+            <div key={stat.label} className={`text-center p-6 sm:p-8 rounded-3xl border-2 shadow-sm transition-transform hover:-translate-y-1 ${
               theme === 'dark' 
                 ? 'bg-slate-800/50 border-slate-700' 
                 : `bg-${stat.color}-50 border-${stat.color}-100`
             }`}>
-              <div className={`text-3xl font-black text-${stat.color}-600`}>{stat.value}</div>
-              <div className={`text-[10px] font-black text-${stat.color}-400 uppercase tracking-widest`}>{stat.label}</div>
+              <div className={`text-4xl sm:text-5xl font-black text-${stat.color}-600`}>{stat.value}</div>
+              <div className={`text-[12px] sm:text-sm font-black text-${stat.color}-400 uppercase tracking-widest mt-2`}>{stat.label}</div>
             </div>
           ))}
         </div>

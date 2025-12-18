@@ -2,8 +2,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { StoryGenerationResult, AppLanguage } from "../types";
 
+// Fix: Always use named parameter for GoogleGenAI initialization as per guidelines
 export const generateStory = async (prompt: string, lang: AppLanguage = 'en'): Promise<StoryGenerationResult> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const languageNames = { en: 'English', ms: 'Bahasa Melayu', id: 'Bahasa Indonesia' };
   const targetLang = languageNames[lang] || 'English';
@@ -37,12 +38,14 @@ export const generateStory = async (prompt: string, lang: AppLanguage = 'en'): P
     }
   });
 
+  // Fix: Access the .text property directly (not a method)
   const result = JSON.parse(response.text || '{}') as StoryGenerationResult;
   return result;
 };
 
+// Fix: Always use named parameter for GoogleGenAI initialization as per guidelines
 export const generateIllustration = async (visualPrompt: string): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
     contents: {
@@ -56,10 +59,13 @@ export const generateIllustration = async (visualPrompt: string): Promise<string
   });
 
   let imageUrl = '';
-  for (const part of response.candidates?.[0]?.content?.parts || []) {
-    if (part.inlineData) {
-      imageUrl = `data:image/png;base64,${part.inlineData.data}`;
-      break;
+  // Fix: Iterate through all parts to find the image part correctly as per nano banana guidelines
+  if (response.candidates && response.candidates.length > 0) {
+    for (const part of response.candidates[0].content.parts) {
+      if (part.inlineData) {
+        imageUrl = `data:image/png;base64,${part.inlineData.data}`;
+        break;
+      }
     }
   }
 
