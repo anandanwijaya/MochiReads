@@ -1,41 +1,45 @@
 
 import { AppLanguage } from './types';
 
+// Define base English strings for reuse as fallback for missing translations
+const baseStrings = {
+  library: 'Library',
+  magicLab: 'Magic Lab',
+  recent: 'Recent',
+  favorites: 'Favorites',
+  forYou: 'For You',
+  signIn: 'Sign In',
+  signOut: 'Sign Out',
+  adventureAwaits: 'ADVENTURE AWAITS!',
+  heroTitle: 'Read, Play, Learn & Create!',
+  heroSubtitle: 'Welcome to the world\'s most magical library! Discover amazing stories or let our AI help you write your very own.',
+  startReading: 'Start Reading',
+  magicStoryLab: 'Magic Story Lab',
+  stories: 'Stories',
+  languages: 'Languages',
+  friends: 'Friends',
+  myFavorites: 'My Favorites',
+  readAgain: 'Read Again',
+  magicalLabPicks: 'Magical Lab Picks',
+  magicalStories: 'Magical Stories',
+  tryTheseIdeas: 'Try these ideas',
+  letsGo: 'LET\'S GO!',
+  magicking: 'MAGICKING...',
+  reviewTale: 'Review Your Magic Tale',
+  publishStory: 'PUBLISH STORY',
+  saving: 'SAVING...',
+  level: 'Level',
+  all: 'All',
+  languageName: 'English',
+  adventureMap: 'Adventure Map',
+  stickers: 'Stickers'
+};
+
+// Fixed: Added all missing language keys required by the AppLanguage type to resolve the TypeScript error
 export const translations: Record<AppLanguage, any> = {
-  en: {
-    library: 'Library',
-    magicLab: 'Magic Lab',
-    recent: 'Recent',
-    favorites: 'Favorites',
-    forYou: 'For You',
-    signIn: 'Sign In',
-    signOut: 'Sign Out',
-    adventureAwaits: 'ADVENTURE AWAITS!',
-    heroTitle: 'Read, Play, Learn & Create!',
-    heroSubtitle: 'Welcome to the world\'s most magical library! Discover amazing stories or let our AI help you write your very own.',
-    startReading: 'Start Reading',
-    magicStoryLab: 'Magic Story Lab',
-    stories: 'Stories',
-    languages: 'Languages',
-    friends: 'Friends',
-    myFavorites: 'My Favorites',
-    readAgain: 'Read Again',
-    magicalLabPicks: 'Magical Lab Picks',
-    magicalStories: 'Magical Stories',
-    tryTheseIdeas: 'Try these ideas',
-    letsGo: 'LET\'S GO!',
-    magicking: 'MAGICKING...',
-    reviewTale: 'Review Your Magic Tale',
-    publishStory: 'PUBLISH STORY',
-    saving: 'SAVING...',
-    level: 'Level',
-    all: 'All',
-    languageName: 'English',
-    adventureMap: 'Adventure Map',
-    stickers: 'Stickers'
-  },
-  // ... rest of languages can be populated similarly
+  en: baseStrings,
   ms: {
+    ...baseStrings,
     library: 'Perpustakaan',
     magicLab: 'Makmal Ajaib',
     recent: 'Terbaru',
@@ -68,6 +72,7 @@ export const translations: Record<AppLanguage, any> = {
     stickers: 'Pelekat'
   },
   id: {
+    ...baseStrings,
     library: 'Perpustakaan',
     magicLab: 'Lab Ajaib',
     recent: 'Terbaru',
@@ -98,9 +103,25 @@ export const translations: Record<AppLanguage, any> = {
     languageName: 'Bahasa Indonesia',
     adventureMap: 'Peta Petualangan',
     stickers: 'Stiker'
-  }
+  },
+  zh: { ...baseStrings, languageName: '中文 (Chinese)' },
+  th: { ...baseStrings, languageName: 'ไทย (Thai)' },
+  ja: { ...baseStrings, languageName: '日本語 (Japanese)' },
+  ko: { ...baseStrings, languageName: '한국어 (Korean)' },
+  tl: { ...baseStrings, languageName: 'Tagalog' },
+  lo: { ...baseStrings, languageName: 'ລາວ (Lao)' },
+  km: { ...baseStrings, languageName: 'ខ្មែរ (Khmer)' },
+  ar: { ...baseStrings, languageName: 'العربية (Arabic)' },
+  de: { ...baseStrings, languageName: 'Deutsch (German)' },
+  fr: { ...baseStrings, languageName: 'Français (French)' },
+  es: { ...baseStrings, languageName: 'Español (Spanish)' },
+  nl: { ...baseStrings, languageName: 'Nederlands (Dutch)' },
+  ru: { ...baseStrings, languageName: 'Русский (Russian)' },
+  it: { ...baseStrings, languageName: 'Italiano (Italian)' },
+  pt: { ...baseStrings, languageName: 'Português (Portuguese)' },
+  tr: { ...baseStrings, languageName: 'Türkçe (Turkish)' }
 };
 
-export const getTranslation = (lang: AppLanguage, key: keyof typeof translations['en']) => {
+export const getTranslation = (lang: AppLanguage, key: keyof typeof baseStrings) => {
   return translations[lang]?.[key] || translations['en'][key];
 };

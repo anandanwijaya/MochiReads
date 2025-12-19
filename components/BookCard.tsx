@@ -56,7 +56,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, onRead, isFavorite, onToggleF
         />
         
         {/* Badges */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none">
+        <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none z-10">
           {(book.id.startsWith('ai') || book.author === 'The Magic Lab') && (
             <div className="bg-indigo-600 text-white p-2 rounded-2xl shadow-xl animate-pulse ring-4 ring-indigo-500/20">
               <Sparkles size={16} strokeWidth={3} />
@@ -68,8 +68,15 @@ const BookCard: React.FC<BookCardProps> = ({ book, onRead, isFavorite, onToggleF
           </div>
         </div>
 
-        {/* Action Cluster - Top Right */}
-        <div className="absolute top-4 right-4 flex flex-col gap-2">
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 bg-indigo-900/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+           <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-indigo-600 shadow-2xl scale-75 group-hover:scale-100 transition-all duration-500">
+              <Play size={32} fill="currentColor" strokeWidth={0} className="ml-1.5 group-hover:animate-bounce" />
+           </div>
+        </div>
+
+        {/* Action Cluster - Top Right - Higher Z-Index to be above overlay */}
+        <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
           {onToggleFavorite && (
             <button 
               onClick={handleFavoriteClick}
@@ -91,12 +98,6 @@ const BookCard: React.FC<BookCardProps> = ({ book, onRead, isFavorite, onToggleF
           >
             <Share2 size={18} strokeWidth={3} />
           </button>
-        </div>
-
-        <div className="absolute inset-0 bg-indigo-900/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-           <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-indigo-600 shadow-2xl scale-75 group-hover:scale-100 transition-all duration-500">
-              <Play size={32} fill="currentColor" strokeWidth={0} className="ml-1.5 group-hover:animate-bounce" />
-           </div>
         </div>
       </div>
       
