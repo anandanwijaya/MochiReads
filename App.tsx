@@ -1,5 +1,5 @@
 
-import { BookOpen, Clock, Globe, Heart, Sparkles, TrendingUp, Trophy, Trash2, PenTool } from 'lucide-react';
+import { BookOpen, Clock, Globe, Heart, Sparkles, TrendingUp, Trophy, Trash2, PenTool, Upload } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AuthModal from './components/AuthModal';
 import BookGrid, { BookShelf } from './components/BookGrid';
@@ -330,9 +330,14 @@ const App: React.FC = () => {
                   </div>
                   My Stories
                 </h2>
-                <button onClick={() => handleNavigate('creator')} className="px-8 py-3 bg-brand-cyan text-white rounded-2xl font-black text-sm shadow-lg tactile-button flex items-center gap-2">
-                  <Sparkles size={18} /> CREATE NEW STORY
-                </button>
+                <div className="flex gap-4">
+                  <button onClick={() => user ? setIsUploadModalOpen(true) : setIsAuthModalOpen(true)} className="px-8 py-3 bg-brand-lavender text-brand-purple rounded-2xl font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+                    <Upload size={18} /> UPLOAD MANUALLY
+                  </button>
+                  <button onClick={() => handleNavigate('creator')} className="px-8 py-3 bg-brand-cyan text-white rounded-2xl font-black text-sm shadow-lg tactile-button flex items-center gap-2">
+                    <Sparkles size={18} /> CREATE WITH AI
+                  </button>
+                </div>
               </div>
               {userCreatedBooks.length > 0 ? (
                 <BookGrid books={userCreatedBooks} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} user={user} />
@@ -340,8 +345,13 @@ const App: React.FC = () => {
                 <div className="text-center py-32 rounded-[4rem] border-8 border-dashed border-brand-cyan animate-in zoom-in duration-500">
                   <PenTool size={60} className="mx-auto mb-6 text-brand-cyan opacity-30" />
                   <h3 className="text-3xl font-display font-black text-brand-violet mb-4">You haven't created any stories!</h3>
-                  <p className="text-slate-400 font-bold mb-10 max-w-md mx-auto">Visit the Magic Lab to author your very first AI-powered book.</p>
-                  <button onClick={() => handleNavigate('creator')} className="px-12 py-4 bg-brand-cyan text-white rounded-[2rem] font-black text-xl shadow-lg tactile-button">Go to Magic Lab</button>
+                  <p className="text-slate-400 font-bold mb-10 max-w-md mx-auto">Visit the Magic Lab to author your very first book or upload one manually.</p>
+                  <div className="flex justify-center gap-6">
+                    <button onClick={() => user ? setIsUploadModalOpen(true) : setIsAuthModalOpen(true)} className="px-12 py-4 bg-white text-brand-cyan border-4 border-brand-cyan/20 rounded-[2rem] font-black text-xl shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-3">
+                      <Upload size={24} /> Upload Manual
+                    </button>
+                    <button onClick={() => handleNavigate('creator')} className="px-12 py-4 bg-brand-cyan text-white rounded-[2rem] font-black text-xl shadow-lg tactile-button">Go to Magic Lab</button>
+                  </div>
                 </div>
               )}
             </div>

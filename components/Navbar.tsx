@@ -1,5 +1,5 @@
 
-import { BookOpen, Globe, Heart, Search, Sparkles, User, X, Check, Menu, Clock, ChevronDown, PenTool } from 'lucide-react';
+import { BookOpen, Globe, Heart, Search, Sparkles, User, X, Check, Menu, Clock, ChevronDown, PenTool, Upload } from 'lucide-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getTranslation, translations } from '../i18n';
 import { AppLanguage, Book, ViewType } from '../types';
@@ -24,7 +24,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ 
-  onNavigate, activeView, user, onLoginClick, favoritesCount, 
+  onNavigate, onUploadClick, activeView, user, onLoginClick, favoritesCount, 
   theme, language, setLanguage, searchQuery, setSearchQuery,
   books, onReadBook
 }) => {
@@ -173,6 +173,18 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+          {/* Manual Upload Button */}
+          <button 
+            onClick={() => { playSound('pop'); onUploadClick(); }}
+            className={`flex items-center gap-2 p-3 rounded-2xl transition-all border-2 group ${
+              isDark ? 'bg-slate-900 border-slate-800 text-slate-400 hover:text-brand-blue' : 'bg-brand-lavender text-brand-purple border-transparent hover:border-brand-purple/20'
+            }`}
+            title="Upload Book Manually"
+          >
+            <Upload size={22} strokeWidth={3} className="group-hover:scale-110 transition-transform" />
+            <span className="text-[10px] font-black uppercase hidden lg:inline tracking-widest">Upload</span>
+          </button>
+
           {/* Language Switcher */}
           <div className="relative" ref={langRef}>
             <button 
