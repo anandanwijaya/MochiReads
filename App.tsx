@@ -1,20 +1,22 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
+
+import { AlertCircle, ArrowRight, BookOpen, Check, Construction, Copy, Database, Loader2, ShieldAlert, Sparkles, Star, TableProperties, Zap, Globe, Trophy } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import AuthModal from './components/AuthModal';
 import BookGrid from './components/BookGrid';
 import BookReader from './components/BookReader';
-import StoryGenerator from './components/StoryGenerator';
-import ReadingProgressTable from './components/ReadingProgressTable';
-import Footer from './components/Footer';
-import Mascot from './components/Mascot';
-import AuthModal from './components/AuthModal';
 import BookUploadModal from './components/BookUploadModal';
-import { Book, Category, Level, LanguageFilter, ViewType, AppLanguage } from './types';
-import { supabase, getManualSession, fetchUserFavorites, toggleFavoriteInDb, fetchReadingProgress } from './services/supabase';
+import Footer from './components/Footer';
+import Hero from './components/Hero';
+import Mascot from './components/Mascot';
+import Navbar from './components/Navbar';
+import ReadingProgressTable from './components/ReadingProgressTable';
+import Achievements from './components/Achievements';
+import StoryGenerator from './components/StoryGenerator';
+import { getTranslation } from './i18n';
 import { seedLibrary, SeedProgress } from './services/seed';
 import { playSound } from './components/SoundEffects';
-import { getTranslation } from './i18n';
-import { BookOpen, Star, AlertCircle, Copy, Check, Construction, Sparkles, Loader2, Database, ShieldAlert, TableProperties, ArrowRight, Zap } from 'lucide-react';
+import { fetchReadingProgress, fetchUserFavorites, getManualSession, supabase, toggleFavoriteInDb } from './services/supabase';
+import { AppLanguage, Book, Category, LanguageFilter, Level, ViewType } from './types';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewType>('library');
@@ -42,12 +44,8 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Seeding State
   const [isSeedViewOpen, setIsSeedViewOpen] = useState(false);
-  const [seedProgress, setSeedProgress] = useState<SeedProgress>({ status: 'idle', count: 0, total: 10, message: '' });
-
-  const [dbError, setDbError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [seedProgress, setSeedProgress] = useState<SeedProgress>({ status: 'idle', count: 0, total: 76, message: '' });
 
   const t = useCallback((key: any) => getTranslation(language, key), [language]);
 
@@ -88,7 +86,6 @@ const App: React.FC = () => {
 
   const triggerSeed = async () => {
     setIsSeedViewOpen(true);
-    setDbError(null);
     playSound('pop');
     await seedLibrary((progress) => {
       setSeedProgress(progress);
@@ -97,63 +94,9 @@ const App: React.FC = () => {
         setTimeout(() => {
           setIsSeedViewOpen(false);
           fetchBooks(false);
-        }, 2000);
-      }
-      if (progress.status === 'error') {
-        playSound('woosh');
-        if (progress.message.includes('RLS ERROR') || progress.message.includes('FK ERROR')) {
-          setDbError(progress.message);
-          setIsSeedViewOpen(false);
-        }
+        }, 3000);
       }
     });
-  };
-
-  const handleCopySql = () => {
-    const sql = `-- !!! MANUAL AUTH SETUP SCRIPT !!!
--- Copy everything and run it in your Supabase SQL Editor.
-
-BEGIN;
-DROP TABLE IF EXISTS public.reading_progress CASCADE;
-DROP TABLE IF EXISTS public.favorites CASCADE;
-DROP TABLE IF EXISTS public.users CASCADE;
-
-CREATE TABLE public.users (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  email text UNIQUE NOT NULL,
-  password_hash text NOT NULL,
-  full_name text,
-  avatar_url text,
-  created_at timestamp with time zone DEFAULT now() NOT NULL
-);
-
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Public profiles" ON public.users FOR SELECT USING (true);
-CREATE POLICY "Registration" ON public.users FOR INSERT WITH CHECK (true);
-
-CREATE TABLE public.favorites (
-  user_email text REFERENCES public.users(email) ON DELETE CASCADE,
-  book_id uuid REFERENCES public.books(id) ON DELETE CASCADE,
-  PRIMARY KEY (user_email, book_id)
-);
-ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Favs access" ON public.favorites FOR ALL USING (true);
-
-CREATE TABLE public.reading_progress (
-  user_email text REFERENCES public.users(email) ON DELETE CASCADE,
-  book_id uuid REFERENCES public.books(id) ON DELETE CASCADE,
-  current_page integer DEFAULT 0,
-  is_finished boolean DEFAULT false,
-  last_read_at timestamp with time zone DEFAULT now(),
-  PRIMARY KEY (user_email, book_id)
-);
-ALTER TABLE public.reading_progress ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Progress access" ON public.reading_progress FOR ALL USING (true);
-COMMIT;`;
-    // Fix: Removed redundant .clipboard property access to correctly call writeText on navigator.clipboard
-    navigator.clipboard.writeText(sql);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const fetchUserData = useCallback(async (userEmail: string) => {
@@ -183,35 +126,19 @@ COMMIT;`;
       }
       setLoading(false);
     };
-
     initApp();
-
-    const channel = supabase
-      .channel('public:books')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'books' }, () => {
-        fetchBooks(false); 
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [fetchBooks, fetchUserData]);
 
-  useEffect(() => { localStorage.setItem('mochi_latest', JSON.stringify(latestRead)); }, [latestRead]);
   useEffect(() => {
     localStorage.setItem('mochi_theme', theme);
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
-  useEffect(() => { localStorage.setItem('mochi_lang', language); }, [language]);
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<{ type: 'read' | 'create' | 'view', data?: any } | null>(null);
 
   const handleReadBook = (book: Book) => {
     if (!user) {
-      setPendingAction({ type: 'read', data: book });
       setIsAuthModalOpen(true);
       return;
     }
@@ -228,48 +155,20 @@ COMMIT;`;
       setIsAuthModalOpen(true);
       return;
     }
-    
     playSound('pop');
     const isFav = favorites.includes(bookId);
-    
     setFavorites(prev => isFav ? prev.filter(id => id !== bookId) : [...prev, bookId]);
     if (!isFav) playSound('tada');
-
-    const success = await toggleFavoriteInDb(user.email, bookId, isFav);
-    if (!success) {
-      setFavorites(prev => isFav ? [...prev, bookId] : prev.filter(id => id !== bookId));
-    }
+    await toggleFavoriteInDb(user.email, bookId, isFav);
   };
 
   const handleNavigate = (v: ViewType) => {
-    const protectedViews: ViewType[] = ['creator', 'favorites', 'latest', 'recommendations', 'progress'];
+    const protectedViews: ViewType[] = ['creator', 'favorites', 'latest', 'recommendations', 'progress', 'achievements'];
     if (!user && protectedViews.includes(v)) {
-      setPendingAction({ type: 'view', data: v });
       setIsAuthModalOpen(true);
       return;
     }
     setView(v);
-  };
-
-  const handleStoryGenerated = (newBook: Book) => {
-    setActiveBook(newBook);
-    setView('library');
-    fetchBooks(false);
-  };
-
-  const handleAuthSuccess = async (userData: any) => {
-    setUser(userData);
-    setIsAuthModalOpen(false);
-    
-    if (userData) {
-      await fetchUserData(userData.email);
-    }
-
-    if (pendingAction) {
-      if (pendingAction.type === 'read') handleReadBook(pendingAction.data);
-      else if (pendingAction.type === 'view') setView(pendingAction.data);
-      setPendingAction(null);
-    }
   };
 
   const filteredBySearch = useMemo(() => {
@@ -278,9 +177,12 @@ COMMIT;`;
     return books.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q));
   }, [books, searchQuery]);
 
-  const favoriteBooks = useMemo(() => filteredBySearch.filter(b => favorites.includes(b.id)), [filteredBySearch, favorites]);
-  const recentBooks = useMemo(() => latestRead.map(id => filteredBySearch.find(b => b.id === id)).filter((b): b is Book => !!b), [filteredBySearch, latestRead]);
-  
+  const finishedCount = readingProgress.filter(p => p.is_finished).length;
+  const exploredLanguages = new Set(readingProgress.map(p => {
+    const b = books.find(book => book.id === p.book_id);
+    return b?.language;
+  })).size;
+
   if (loading) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-[#fdfbff] text-slate-800'}`}>
@@ -297,6 +199,7 @@ COMMIT;`;
       <Navbar 
         onNavigate={handleNavigate}
         onUploadClick={() => setIsUploadModalOpen(true)}
+        onSeedClick={triggerSeed}
         activeView={view}
         user={user}
         onLoginClick={() => setIsAuthModalOpen(true)}
@@ -311,23 +214,30 @@ COMMIT;`;
         onReadBook={handleReadBook}
       />
 
+      <div className="fixed top-24 left-6 z-[60] flex flex-col gap-4 pointer-events-none sm:pointer-events-auto">
+        <button 
+          onClick={() => handleNavigate('achievements')}
+          className={`group flex items-center gap-3 px-6 py-3 rounded-[2rem] border-4 transition-all hover:scale-105 active:scale-95 tactile-button shadow-xl ${
+            view === 'achievements' 
+              ? 'bg-amber-400 border-amber-300 text-white' 
+              : (theme === 'dark' ? 'bg-slate-800 border-slate-700 text-amber-400' : 'bg-white border-amber-100 text-amber-500')
+          }`}
+        >
+          <Trophy size={20} className="group-hover:rotate-12 transition-transform" />
+          <span className="text-xs font-black uppercase tracking-widest hidden md:inline">Adventure Map</span>
+          {finishedCount > 0 && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] text-white animate-pulse">
+              {finishedCount}
+            </span>
+          )}
+        </button>
+      </div>
+
       <main className="w-full">
         {view === 'library' && (
           <>
-            <Hero 
-              onStartCreating={() => handleNavigate('creator')}
-              language={language}
-              theme={theme}
-            />
+            <Hero onStartCreating={() => handleNavigate('creator')} language={language} theme={theme} />
             <div id="library-section" className="pt-20 px-4 sm:px-8 lg:px-12">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="p-2 bg-indigo-600 rounded-xl text-white shadow-lg">
-                  <Star size={24} fill="currentColor" />
-                </div>
-                <h2 className={`text-3xl font-display font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-                  {t('magicalStories')}
-                </h2>
-              </div>
               <BookGrid 
                 books={filteredBySearch}
                 onRead={handleReadBook}
@@ -347,27 +257,20 @@ COMMIT;`;
           </>
         )}
 
+        {view === 'achievements' && (
+          <Achievements finishedCount={finishedCount} languageCount={exploredLanguages} theme={theme} />
+        )}
+
         {view === 'creator' && (
           <div className="px-4 sm:px-8 lg:px-12">
-            <StoryGenerator 
-              onStoryGenerated={handleStoryGenerated}
-              language={language}
-              theme={theme}
-            />
+            <StoryGenerator onStoryGenerated={(b) => { handleReadBook(b); fetchBooks(); }} language={language} theme={theme} />
           </div>
         )}
 
         {view === 'favorites' && (
           <div className="py-12 px-4 sm:px-8 lg:px-12">
             <h2 className="text-4xl font-display font-bold mb-12">{t('myFavorites')}</h2>
-            <BookGrid books={favoriteBooks} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} />
-          </div>
-        )}
-
-        {view === 'latest' && (
-          <div className="py-12 px-4 sm:px-8 lg:px-12">
-            <h2 className="text-4xl font-display font-bold mb-12">{t('recent')}</h2>
-            <BookGrid books={recentBooks} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} />
+            <BookGrid books={filteredBySearch.filter(b => favorites.includes(b.id))} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} />
           </div>
         )}
 
@@ -379,41 +282,8 @@ COMMIT;`;
         )}
       </main>
 
-      <Footer 
-        theme={theme} 
-        language={language} 
-        onAdminSeed={() => triggerSeed()}
-      />
+      <Footer theme={theme} language={language} onAdminSeed={() => triggerSeed()} />
       <Mascot theme={theme} language={language} />
-
-      {isSeedViewOpen && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div className={`w-full max-w-lg rounded-[3rem] shadow-2xl overflow-hidden border-8 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-indigo-100'}`}>
-            <div className="p-8 sm:p-12 text-center">
-              {seedProgress.status === 'error' ? (
-                <div className="w-20 h-20 bg-red-100 text-red-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                  <AlertCircle size={40} />
-                </div>
-              ) : seedProgress.status === 'success' ? (
-                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                  <Check size={40} />
-                </div>
-              ) : (
-                <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                  <Loader2 size={40} className="animate-spin" />
-                </div>
-              )}
-              <h2 className="text-2xl font-display font-bold mb-2">
-                {seedProgress.status === 'error' ? 'Magic Interrupted' : seedProgress.status === 'success' ? 'Library Ready!' : 'Initializing Library'}
-              </h2>
-              <p className="text-slate-500 mb-8 font-medium">{seedProgress.message}</p>
-              {seedProgress.status === 'error' && (
-                <button onClick={() => setIsSeedViewOpen(false)} className="w-full py-4 bg-slate-800 text-white rounded-2xl font-black mt-4">Close</button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {activeBook && (
         <BookReader 
@@ -425,20 +295,8 @@ COMMIT;`;
         />
       )}
 
-      <AuthModal 
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onAuthSuccess={handleAuthSuccess}
-        theme={theme}
-      />
-
-      <BookUploadModal 
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        onUploadSuccess={() => fetchBooks(false)}
-        theme={theme}
-        language={language}
-      />
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} onAuthSuccess={(u) => { setUser(u); fetchUserData(u.email); setIsAuthModalOpen(false); }} theme={theme} />
+      <BookUploadModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} onUploadSuccess={() => fetchBooks(false)} theme={theme} language={language} />
     </div>
   );
 };

@@ -2,11 +2,31 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { StoryGenerationResult, AppLanguage } from "../types";
 
-// Fix: Always use named parameter for GoogleGenAI initialization as per guidelines
+// Supported languages mapping for AI prompts
+const languageNames: Record<AppLanguage, string> = { 
+  en: 'English', 
+  ms: 'Bahasa Melayu', 
+  id: 'Bahasa Indonesia',
+  zh: 'Simplified Chinese (Mandarin)',
+  th: 'Thai',
+  ja: 'Japanese',
+  ko: 'Korean',
+  tl: 'Tagalog (Filipino)',
+  lo: 'Lao',
+  km: 'Khmer (Cambodian)',
+  ar: 'Arabic',
+  de: 'German',
+  fr: 'French',
+  es: 'Spanish',
+  nl: 'Dutch',
+  ru: 'Russian',
+  it: 'Italian',
+  pt: 'Portuguese',
+  tr: 'Turkish'
+};
+
 export const generateStory = async (prompt: string, lang: AppLanguage = 'en'): Promise<StoryGenerationResult> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
-  const languageNames = { en: 'English', ms: 'Bahasa Melayu', id: 'Bahasa Indonesia' };
   const targetLang = languageNames[lang] || 'English';
 
   const response = await ai.models.generateContent({
@@ -38,12 +58,10 @@ export const generateStory = async (prompt: string, lang: AppLanguage = 'en'): P
     }
   });
 
-  // Fix: Access the .text property directly (not a method)
   const result = JSON.parse(response.text || '{}') as StoryGenerationResult;
   return result;
 };
 
-// Fix: Always use named parameter for GoogleGenAI initialization as per guidelines
 export const generateIllustration = async (visualPrompt: string): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
@@ -59,7 +77,6 @@ export const generateIllustration = async (visualPrompt: string): Promise<string
   });
 
   let imageUrl = '';
-  // Fix: Iterate through all parts to find the image part correctly as per nano banana guidelines
   if (response.candidates && response.candidates.length > 0) {
     for (const part of response.candidates[0].content.parts) {
       if (part.inlineData) {

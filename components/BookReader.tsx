@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { Book } from '../types';
-import { ChevronLeft, ChevronRight, Volume2, VolumeX, Info, Share2, Download, Sun, Star, Home, PartyPopper, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Volume2, VolumeX, Info, Share2, Download, Sun, Star, Home, PartyPopper, X, Music, Sparkles } from 'lucide-react';
 import { playSound } from './SoundEffects';
 import { supabase, updateReadingProgress } from '../services/supabase';
 
@@ -17,13 +18,14 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
   const [showThumbnails, setShowThumbnails] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [isReadingAloud, setIsReadingAloud] = useState(false);
+  const [isAmbianceActive, setIsAmbianceActive] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const synth = window.speechSynthesis;
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const totalPages = book.pages.length;
   const progress = ((currentPage + 1) / totalPages) * 100;
 
-  // Track progress when page changes or book finishes
   useEffect(() => {
     if (userId) {
       updateReadingProgress(userId, book.id, currentPage, isDone);
@@ -33,6 +35,23 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
   const stopReading = () => {
     synth.cancel();
     setIsReadingAloud(false);
+  };
+
+  const toggleAmbiance = () => {
+    playSound('pop');
+    if (!isAmbianceActive) {
+      // Loop whimsical music from a library
+      audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2034/2034-preview.mp3');
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.15;
+      audioRef.current.play().catch(() => {});
+      setIsAmbianceActive(true);
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      setIsAmbianceActive(false);
+    }
   };
 
   const toggleReading = () => {
@@ -59,14 +78,7 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
       } catch (err) {
         console.log('Error sharing:', err);
       }
-    } else {
-      alert('Sharing is not supported on this browser. Copy the URL to share!');
     }
-  };
-
-  const handleDownload = () => {
-    playSound('pop');
-    window.print();
   };
 
   const next = () => {
@@ -96,6 +108,7 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       stopReading();
+      if (audioRef.current) audioRef.current.pause();
     };
   }, [onClose, currentPage]);
 
@@ -125,15 +138,17 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
             <h2 className={`font-display font-bold text-lg sm:text-xl leading-tight line-clamp-1 ${isDark ? 'text-white' : 'text-slate-800'}`}>
               {book.title}
             </h2>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>{book.language}</span>
-              <span className={`w-1.5 h-1.5 rounded-full ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`} />
-              <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-fuchsia-400' : 'text-fuchsia-600'}`}>Level {book.level}</span>
-            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <button 
+            onClick={toggleAmbiance}
+            className={`p-2.5 sm:p-3 rounded-2xl transition-all shadow-sm group ${isAmbianceActive ? 'bg-indigo-100 text-indigo-600 animate-pulse' : (isDark ? 'bg-slate-800 text-indigo-400 hover:bg-slate-700' : 'bg-indigo-50 text-indigo-400 hover:bg-indigo-100')}`}
+            title="Magic Ambiance"
+          >
+            <Music size={24} className={isAmbianceActive ? 'animate-bounce' : ''} />
+          </button>
           <button 
             onClick={() => { playSound('pop'); toggleReading(); }}
             className={`p-2.5 sm:p-3 rounded-2xl transition-all shadow-sm ${isReadingAloud ? 'bg-fuchsia-100 text-fuchsia-600' : (isDark ? 'bg-slate-800 text-amber-400 hover:bg-slate-700' : 'bg-amber-50 text-amber-400 hover:bg-amber-100')}`}
@@ -142,48 +157,13 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
             {isReadingAloud ? <VolumeX size={24} /> : <Volume2 size={24} />}
           </button>
           <button 
-            onClick={handleShare}
-            className={`p-2.5 sm:p-3 rounded-2xl transition-all shadow-sm ${isDark ? 'bg-slate-800 text-purple-400 hover:bg-slate-700' : 'bg-purple-50 text-purple-600 hover:bg-purple-100'}`}
-            title="Share Story"
-          >
-            <Share2 size={24} />
-          </button>
-          <button 
             onClick={() => { playSound('pop'); setShowInfo(!showInfo); }}
             className={`p-2.5 sm:p-3 rounded-2xl transition-all shadow-sm ${showInfo ? (isDark ? 'bg-purple-900/40 text-purple-400' : 'bg-purple-100 text-purple-700') : (isDark ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-50 text-slate-400 hover:bg-slate-100')}`}
-            title="Story Info"
           >
             <Info size={24} />
           </button>
         </div>
       </header>
-
-      {showInfo && (
-        <div className={`absolute top-24 right-6 z-[110] w-80 rounded-3xl shadow-2xl border-4 p-6 animate-in slide-in-from-top-4 duration-300 print:hidden ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-purple-50'}`}>
-          <div className="flex justify-between items-start mb-4">
-            <h3 className={`font-display font-bold text-lg ${isDark ? 'text-white' : 'text-slate-800'}`}>Story Details</h3>
-            <button onClick={() => setShowInfo(false)} className="text-slate-400 hover:text-slate-600">
-              <X size={20} />
-            </button>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">About this book</p>
-              <p className={`text-sm font-medium leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{book.description}</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Author</p>
-                <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>{book.author}</p>
-              </div>
-              <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Illustrator</p>
-                <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>{book.illustrator}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className={`flex-1 relative flex flex-col items-center overflow-hidden print:bg-white print:overflow-visible ${isDark ? 'bg-slate-950' : 'bg-[#fdfbff]'}`}>
         <div className="absolute left-4 sm:left-6 inset-y-0 z-10 hidden lg:flex items-center print:hidden">
@@ -211,8 +191,12 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
                <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner animate-bounce ${isDark ? 'bg-purple-900/20 text-purple-400' : 'bg-purple-50 text-purple-600'}`}>
                   <PartyPopper size={48} />
                </div>
-               <h2 className={`text-3xl sm:text-4xl font-display font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-800'}`}>YOU DID IT!</h2>
-               <p className={`text-lg sm:text-xl font-bold mb-10 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>You finished reading "{book.title}"! You're a super reader!</p>
+               <h2 className={`text-3xl sm:text-4xl font-display font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-800'}`}>MAGICAL!</h2>
+               <p className={`text-lg sm:text-xl font-bold mb-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>You finished reading "{book.title}"!</p>
+               <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-2xl mb-10 flex items-center justify-center gap-2 border-2 border-amber-200">
+                  <Star size={20} className="text-amber-500" fill="currentColor" />
+                  <span className="text-amber-700 dark:text-amber-400 font-black uppercase tracking-widest text-xs">+10 Adventure Stars Earned!</span>
+               </div>
                <div className="flex flex-col gap-4">
                  <button 
                   onClick={() => { playSound('pop'); setIsDone(false); setCurrentPage(0); }}
@@ -290,7 +274,7 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
 
           <div className="flex items-center gap-4">
             <button 
-              onClick={handleDownload}
+              onClick={() => { playSound('pop'); window.print(); }}
               className={`flex items-center gap-2 text-[10px] sm:text-xs font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-colors ${isDark ? 'bg-slate-900 text-purple-400 hover:bg-slate-800' : 'bg-purple-50 text-purple-600 hover:bg-purple-100'}`}
             >
               <Download size={16} strokeWidth={3} />
@@ -298,46 +282,7 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
             </button>
           </div>
         </div>
-
-        {showThumbnails && (
-          <div className={`p-4 border-t-4 overflow-x-auto flex gap-4 no-scrollbar animate-in slide-in-from-bottom-4 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
-            {book.pages.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => { playSound('pop'); setCurrentPage(idx); }}
-                className={`relative flex-shrink-0 w-16 h-20 sm:w-20 sm:h-24 rounded-2xl overflow-hidden border-4 transition-all ${
-                  currentPage === idx 
-                    ? 'border-purple-600 ring-4 ring-purple-100/20 scale-105 z-10 shadow-xl' 
-                    : `opacity-60 hover:opacity-100 ${isDark ? 'border-slate-800' : 'border-white'}`
-                }`}
-              >
-                <img 
-                  src={getPageImage(idx)}
-                  className="w-full h-full object-cover"
-                  alt={`Page ${idx + 1}`}
-                />
-                <div className="absolute bottom-1 right-2 text-[10px] text-white font-black drop-shadow-md">
-                  {idx + 1}
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
       </footer>
-
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        @media print {
-          body { visibility: hidden; }
-          .print-content { visibility: visible; }
-        }
-      `}</style>
     </div>
   );
 };

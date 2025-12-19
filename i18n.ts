@@ -1,7 +1,7 @@
 
 import { AppLanguage } from './types';
 
-export const translations = {
+export const translations: Record<AppLanguage, any> = {
   en: {
     library: 'Library',
     magicLab: 'Magic Lab',
@@ -30,8 +30,11 @@ export const translations = {
     saving: 'SAVING...',
     level: 'Level',
     all: 'All',
-    languageName: 'English'
+    languageName: 'English',
+    adventureMap: 'Adventure Map',
+    stickers: 'Stickers'
   },
+  // ... rest of languages can be populated similarly
   ms: {
     library: 'Perpustakaan',
     magicLab: 'Makmal Ajaib',
@@ -60,7 +63,9 @@ export const translations = {
     saving: 'MENYIMPAN...',
     level: 'Tahap',
     all: 'Semua',
-    languageName: 'Bahasa Melayu'
+    languageName: 'Bahasa Melayu',
+    adventureMap: 'Peta Pengembaraan',
+    stickers: 'Pelekat'
   },
   id: {
     library: 'Perpustakaan',
@@ -90,10 +95,12 @@ export const translations = {
     saving: 'MENYIMPAN...',
     level: 'Level',
     all: 'Semua',
-    languageName: 'Bahasa Indonesia'
+    languageName: 'Bahasa Indonesia',
+    adventureMap: 'Peta Petualangan',
+    stickers: 'Stiker'
   }
 };
 
 export const getTranslation = (lang: AppLanguage, key: keyof typeof translations['en']) => {
-  return translations[lang][key] || translations['en'][key];
+  return translations[lang]?.[key] || translations['en'][key];
 };

@@ -17,6 +17,13 @@
               sans: ['Quicksand', 'sans-serif'],
             },
             colors: {
+              magic: {
+                mint: '#d1fae5',
+                coral: '#fee2e2',
+                lemon: '#fef3c7',
+                sky: '#e0f2fe',
+                purple: '#f3e8ff'
+              },
               purple: {
                 50: '#f5f3ff',
                 100: '#ede9fe',
@@ -30,6 +37,36 @@
                 900: '#4c1d95',
                 950: '#2e1065',
               },
+            },
+            animation: {
+              'bounce-slow': 'bounce 3s infinite',
+              'float': 'floating 3s ease-in-out infinite',
+              'pulse-soft': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'squish': 'squish 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+              'sparkle': 'sparkle 0.6s ease-out forwards',
+              'shake': 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both',
+            },
+            keyframes: {
+              floating: {
+                '0%, 100%': { transform: 'translateY(0px)' },
+                '50%': { transform: 'translateY(-15px)' },
+              },
+              squish: {
+                '0%': { transform: 'scale(1)' },
+                '30%': { transform: 'scale(1.1, 0.85)' },
+                '100%': { transform: 'scale(1)' },
+              },
+              sparkle: {
+                '0%': { opacity: 0, transform: 'scale(0) rotate(0deg)' },
+                '50%': { opacity: 1, transform: 'scale(1.2) rotate(180deg)' },
+                '100%': { opacity: 0, transform: 'scale(1) rotate(360deg)' },
+              },
+              shake: {
+                '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                '40%, 60%': { transform: 'translate3d(4px, 0, 0)' },
+              }
             }
           }
         }
@@ -44,26 +81,44 @@
         transition: background-color 0.3s ease, color 0.3s ease;
       }
       .dark body {
-        background-image: radial-gradient(#1e1b4b 1px, transparent 1px);
+        background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
         background-color: #020617;
       }
       body:not(.dark) {
-        background-image: radial-gradient(#f3e8ff 1px, transparent 1px);
+        background-image: radial-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px);
         background-color: #fdfbff;
       }
-      body {
-        background-size: 40px 40px;
+      body { background-size: 40px 40px; }
+      
+      .tactile-button {
+        box-shadow: 0 6px 0 0 rgba(0,0,0,0.1);
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
-      h1, h2, h3, .font-display {
-        font-family: 'Fredoka', sans-serif;
+      .tactile-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 0 0 rgba(0,0,0,0.08);
       }
-      .font-playful {
-        font-family: 'Bubblegum Sans', cursive;
+      .tactile-button:active {
+        transform: translateY(4px) scale(0.98);
+        box-shadow: 0 2px 0 0 rgba(0,0,0,0.1);
       }
-      * {
-        transition-property: background-color, border-color, color, fill, stroke;
-        transition-duration: 300ms;
+      
+      .sparkle-container { position: relative; }
+      .sparkle-container::after {
+        content: '✨';
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        font-size: 20px;
+        opacity: 0;
+        pointer-events: none;
       }
+      .sparkle-container:hover::after {
+        animation: sparkle 0.8s ease-out forwards;
+      }
+
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 <script type="importmap">
 {

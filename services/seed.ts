@@ -1,16 +1,18 @@
+
 import { MOCK_BOOKS } from '../constants';
 import { supabase, uploadImageFromUrl, uploadImageFromBase64 } from './supabase';
 
 export interface SeedProgress {
   status: 'idle' | 'testing' | 'uploading' | 'finishing' | 'error' | 'success';
   currentBook?: string;
+  currentLanguage?: string;
   count: number;
   total: number;
   message: string;
 }
 
 /**
- * Tests the storage bucket connection.
+ * Checks if the storage bucket is accessible before starting bulk operations.
  */
 export const testStorage = async (): Promise<boolean> => {
   try {
@@ -25,13 +27,17 @@ export const testStorage = async (): Promise<boolean> => {
 };
 
 /**
- * Seeds the library with 10 books.
- * @param onProgress Callback to update UI with current status
+ * seedLibrary: Deploys the full 76-book collection (4 per language).
  */
 export const seedLibrary = async (onProgress: (p: SeedProgress) => void) => {
   const totalBooks = MOCK_BOOKS.length;
   
-  onProgress({ status: 'testing', count: 0, total: totalBooks, message: 'Testing magical storage connection...' });
+  onProgress({ 
+    status: 'testing', 
+    count: 0, 
+    total: totalBooks, 
+    message: 'Initializing Global Library Seed (76 Books)...' 
+  });
   
   const canUpload = await testStorage();
   if (!canUpload) {
@@ -39,12 +45,10 @@ export const seedLibrary = async (onProgress: (p: SeedProgress) => void) => {
       status: 'error', 
       count: 0, 
       total: totalBooks, 
-      message: "Storage Error: Bucket 'images' not found or not public. Go to Supabase -> Storage -> Create public 'images' bucket." 
+      message: "Storage bucket access failed. Please ensure the 'images' bucket exists and is public." 
     });
     return;
   }
-
-  onProgress({ status: 'uploading', count: 0, total: totalBooks, message: 'Waking up the storytellers...' });
 
   for (let i = 0; i < totalBooks; i++) {
     const book = MOCK_BOOKS[i];
@@ -53,29 +57,34 @@ export const seedLibrary = async (onProgress: (p: SeedProgress) => void) => {
       count: i + 1, 
       total: totalBooks, 
       currentBook: book.title,
-      message: `Painting covers for "${book.title}"...` 
+      currentLanguage: book.language,
+      message: `Deploying ${book.language} Story ${((i % 4) + 1)}/4: "${book.title}"` 
     });
 
     try {
-      // Add a small delay between books to prevent network congestion
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Small stagger to manage API throughput
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       const timestamp = Date.now();
       
-      // 1. Upload Cover
+      // 1. Upload Cover via the requested uploadImage pattern
       const coverFileName = `library/${book.id}/cover-${timestamp}.jpg`;
       const coverUpload = await uploadImageFromUrl(book.coverImage, coverFileName, book.title);
 
-      // 2. Upload Pages (Placeholder images to storage)
+      // 2. Upload Page Images (Mocking diverse illustrations for each page)
       const pageImageUrls: string[] = [];
+      const pageImagePaths: string[] = [];
+      
       for (let pIdx = 0; pIdx < book.pages.length; pIdx++) {
         const pageFileName = `library/${book.id}/page-${pIdx}-${timestamp}.jpg`;
-        const sourceUrl = `https://picsum.photos/seed/mochi-${book.id}-${pIdx}/800/600`;
+        // Using high-quality thematic placeholders for seed data
+        const sourceUrl = `https://picsum.photos/seed/book-${book.id}-page-${pIdx}/800/600`;
         const pageUpload = await uploadImageFromUrl(sourceUrl, pageFileName, `Page ${pIdx + 1}`);
         pageImageUrls.push(pageUpload.url);
+        pageImagePaths.push(pageUpload.path);
       }
 
-      // 3. Insert to DB using your exact schema
+      // 3. Insert Book Record to Database
       const { error: dbError } = await supabase
         .from('books')
         .insert([{
@@ -96,19 +105,21 @@ export const seedLibrary = async (onProgress: (p: SeedProgress) => void) => {
       if (dbError) throw dbError;
 
     } catch (err: any) {
-      console.error(`Error seeding "${book.title}":`, err);
-      const isRls = err.message?.includes('row-level security');
+      console.error(`Seed failure for "${book.title}":`, err);
       onProgress({ 
         status: 'error', 
         count: i, 
         total: totalBooks, 
-        message: isRls 
-          ? `RLS ERROR: You need to enable INSERT policies for the 'books' table in Supabase.`
-          : `Failed at "${book.title}": ${err.message}` 
+        message: `Deployment failed at "${book.title}" (${book.language}): ${err.message}` 
       });
       return;
     }
   }
 
-  onProgress({ status: 'success', count: totalBooks, total: totalBooks, message: 'The library is officially magical!' });
+  onProgress({ 
+    status: 'success', 
+    count: totalBooks, 
+    total: totalBooks, 
+    message: `Magical deployment complete! 76 localized books are now live in the library.` 
+  });
 };

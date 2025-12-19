@@ -1,13 +1,32 @@
 import { createClient } from '@supabase/supabase-js';
 import * as jose from 'jose';
 
-const supabaseUrl = 'https://pjijqlzkvnmweocctdbo.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqaWpxbHprdm5td2VvY2N0ZGJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwNDI5MTUsImV4cCI6MjA4MTYxODkxNX0.ymlSxkTpJQPoWyKCoubO2gpyzl4TgKbx913AoB1yaAI';
+const supabaseUrl = process.env.SUPABASE_URL || 'https://pjijqlzkvnmweocctdbo.supabase.co';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqaWpxbHprdm5td2VvY2N0ZGJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwNDI5MTUsImV4cCI6MjA4MTYxODkxNX0.ymlSxkTpJQPoWyKCoubO2gpyzl4TgKbx913AoB1yaAI';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const JWT_SECRET = new TextEncoder().encode('mochi_reads_magic_secret_key_2024');
 const TOKEN_KEY = 'mochi_auth_token';
+
+// --- TOKEN HELPERS ---
+
+const setToken = (token: string) => localStorage.setItem(TOKEN_KEY, token);
+const getToken = () => localStorage.getItem(TOKEN_KEY);
+const removeToken = () => localStorage.removeItem(TOKEN_KEY);
+
+/**
+ * Validates a JWT token without hitting the database.
+ * Returns the payload if valid, or null if expired/invalid.
+ */
+export const validateToken = async (token: string) => {
+  try {
+    const { payload } = await jose.jwtVerify(token, JWT_SECRET);
+    return payload;
+  } catch (err) {
+    return null;
+  }
+};
 
 // --- PASSWORD HASHING ---
 async function hashPassword(password: string): Promise<string> {
@@ -38,13 +57,14 @@ export const manualSignUp = async (email: string, password: string, fullName: st
       throw error;
     }
 
+    // Generate token valid for 7 days
     const token = await new jose.SignJWT({ id: data.id, email: data.email })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime('7d')
       .sign(JWT_SECRET);
 
-    localStorage.setItem(TOKEN_KEY, token);
+    setToken(token);
     return { data, error: null };
   } catch (err: any) {
     return { data: null, error: err };
@@ -65,41 +85,57 @@ export const manualSignIn = async (email: string, password: string) => {
     if (error) throw error;
     if (!user) throw new Error('Invalid email or password');
 
+    // Generate token valid for 7 days
     const token = await new jose.SignJWT({ id: user.id, email: user.email })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime('7d')
       .sign(JWT_SECRET);
 
-    localStorage.setItem(TOKEN_KEY, token);
+    setToken(token);
     return { data: user, error: null };
   } catch (err: any) {
     return { data: null, error: err };
   }
 };
 
+/**
+ * Retrieves the current session by validating the stored token.
+ * If the token is expired or invalid, it is removed.
+ */
 export const getManualSession = async () => {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = getToken();
   if (!token) return null;
 
+  const payload = await validateToken(token);
+  
+  if (!payload) {
+    console.warn("Session expired or invalid token. Clearing storage.");
+    removeToken();
+    return null;
+  }
+
   try {
-    const { payload } = await jose.jwtVerify(token, JWT_SECRET);
     const { data: user, error } = await supabase
       .from('users')
       .select('*')
       .eq('id', payload.id)
       .single();
 
-    if (error || !user) throw new Error('Session expired');
+    if (error || !user) {
+      removeToken();
+      return null;
+    }
+    
     return user;
   } catch (err) {
-    localStorage.removeItem(TOKEN_KEY);
+    removeToken();
     return null;
   }
 };
 
 export const signOut = () => {
-  localStorage.removeItem(TOKEN_KEY);
+  removeToken();
   return Promise.resolve();
 };
 
@@ -110,7 +146,7 @@ export const signInWithGoogle = () => {
 
 export const syncGoogleUser = (user: any) => Promise.resolve(user);
 
-// --- FAVORITES (Using user email for identity) ---
+// --- FAVORITES ---
 export const fetchUserFavorites = async (userEmail: string) => {
   const { data, error } = await supabase
     .from('favorites')
@@ -208,6 +244,6 @@ export const uploadImageFromUrl = async (url: string, fileName: string, fallback
     return { url: publicUrl, path: data.path };
   } catch (err) {
     console.error('URL Upload Error:', err);
-    return { url: url, path: '' }; // Fallback to original URL
+    return { url: url, path: '' }; 
   }
 };

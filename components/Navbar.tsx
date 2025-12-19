@@ -1,13 +1,15 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { BookOpen, Sparkles, Search, User, Heart, LogOut, Clock, Star, Moon, Sun, Globe, Upload, X, BarChart2, Book as BookIcon } from 'lucide-react';
-import { playSound } from './SoundEffects';
+
+import { BarChart2, Book as BookIcon, BookOpen, Clock, Heart, LogOut, Moon, Search, Sparkles, Sun, Upload, User, X, Globe, Check, Database } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { getTranslation, translations } from '../i18n';
 import { signOut } from '../services/supabase';
-import { ViewType, AppLanguage, Book } from '../types';
-import { getTranslation } from '../i18n';
+import { AppLanguage, Book, ViewType } from '../types';
+import { playSound } from './SoundEffects';
 
 interface NavbarProps {
   onNavigate: (view: ViewType) => void;
   onUploadClick: () => void;
+  onSeedClick: () => void;
   activeView: ViewType;
   user: any;
   onLoginClick: () => void;
@@ -23,19 +25,27 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ 
-  onNavigate, onUploadClick, activeView, user, onLoginClick, favoritesCount, 
+  onNavigate, onUploadClick, onSeedClick, activeView, user, onLoginClick, favoritesCount, 
   theme, toggleTheme, language, setLanguage, searchQuery, setSearchQuery,
   books, onReadBook
 }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
   const t = (key: any) => getTranslation(language, key);
 
   const handleNav = (view: ViewType) => {
     playSound('pop');
     onNavigate(view);
     setShowProfileMenu(false);
+  };
+
+  const handleLangSelect = (lang: AppLanguage) => {
+    playSound('pop');
+    setLanguage(lang);
+    setShowLangMenu(false);
   };
 
   const suggestions = useMemo(() => {
@@ -52,9 +62,18 @@ const Navbar: React.FC<NavbarProps> = ({
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
       }
+      if (langRef.current && !langRef.current.contains(event.target as Node)) {
+        setShowLangMenu(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const sortedLanguages = useMemo(() => {
+    return (Object.keys(translations) as AppLanguage[]).sort((a, b) => 
+      translations[a].languageName.localeCompare(translations[b].languageName)
+    );
   }, []);
 
   return (
@@ -120,7 +139,7 @@ const Navbar: React.FC<NavbarProps> = ({
                       playSound('pop');
                       setSearchQuery(book.title);
                       setShowSuggestions(false);
-                      handleNav('library');
+                      onReadBook(book);
                     }}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
                       theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-indigo-50/50'
@@ -143,7 +162,42 @@ const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="hidden lg:flex items-center gap-1 mr-2">
+          {/* Language Selector */}
+          <div className="relative" ref={langRef}>
+            <button 
+              onClick={() => { playSound('pop'); setShowLangMenu(!showLangMenu); }}
+              className={`p-2 rounded-xl border-2 transition-all flex items-center gap-1.5 ${
+                theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700' : 'bg-slate-50 border-slate-100 text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <Globe size={18} />
+              <span className="hidden lg:inline text-xs font-black uppercase tracking-widest">{language}</span>
+            </button>
+            {showLangMenu && (
+              <div className={`absolute top-full right-0 mt-3 w-64 max-h-80 overflow-y-auto rounded-2xl shadow-2xl border-2 p-2 animate-in slide-in-from-top-2 duration-200 z-[120] ${
+                theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-50'
+              }`}>
+                <div className="p-1 space-y-1">
+                  {sortedLanguages.map((langCode) => (
+                    <button
+                      key={langCode}
+                      onClick={() => handleLangSelect(langCode)}
+                      className={`w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl text-left transition-colors text-sm font-bold ${
+                        language === langCode 
+                          ? 'bg-indigo-600 text-white' 
+                          : (theme === 'dark' ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-50')
+                      }`}
+                    >
+                      <span>{translations[langCode].languageName}</span>
+                      {language === langCode && <Check size={16} />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="hidden lg:flex items-center gap-1">
             {[
               { id: 'latest', icon: <Clock size={18} />, label: t('recent') },
               { id: 'favorites', icon: <Heart size={18} />, label: t('favorites'), badge: favoritesCount > 0 },
@@ -214,12 +268,22 @@ const Navbar: React.FC<NavbarProps> = ({
 
                   <button 
                     onClick={() => { onUploadClick(); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-colors font-bold text-sm"
+                    className={`w-full flex items-center gap-2 px-4 py-2 rounded-xl transition-colors font-bold text-sm ${theme === 'dark' ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-600 hover:bg-slate-50'}`}
                   >
                     <Upload size={16} />
                     Upload Book
                   </button>
+
+                  <button 
+                    onClick={() => { onSeedClick(); setShowProfileMenu(false); }}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-colors font-bold text-sm"
+                  >
+                    <Database size={16} />
+                    Seed Library (76)
+                  </button>
                   
+                  <div className={`h-[1px] my-1 ${theme === 'dark' ? 'bg-slate-700' : 'bg-slate-100'}`} />
+
                   <button 
                     onClick={async () => { playSound('pop'); await signOut(); setShowProfileMenu(false); }}
                     className="w-full flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors font-bold text-sm"
@@ -241,13 +305,21 @@ const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
+          {/* Theme Toggle Button */}
           <button 
             onClick={() => { playSound('pop'); toggleTheme(); }}
-            className={`p-2 rounded-xl transition-all ${
-              theme === 'dark' ? 'text-amber-400' : 'text-slate-400 hover:text-indigo-600'
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            className={`p-2 rounded-xl transition-all border-2 flex items-center justify-center ${
+              theme === 'dark' 
+                ? 'bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700 hover:border-amber-400/30 hover:shadow-[0_0_15px_rgba(251,191,36,0.1)]' 
+                : 'bg-indigo-50 border-indigo-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-white'
             }`}
           >
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            {theme === 'dark' ? (
+              <Sun size={20} className="animate-in spin-in-180 duration-500" />
+            ) : (
+              <Moon size={20} className="animate-in spin-in-180 duration-500" />
+            )}
           </button>
         </div>
       </div>
