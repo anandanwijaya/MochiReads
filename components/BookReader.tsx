@@ -102,17 +102,17 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
 
   return (
     <div className={`fixed inset-0 z-[100] flex flex-col transition-colors duration-300 ${isDark ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900'} overflow-hidden font-sans`}>
-      <header className={`flex-none flex items-center justify-between px-4 sm:px-8 h-16 sm:h-24 border-b-4 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-purple-50'}`}>
-        <div className="flex items-center gap-3 sm:gap-6 overflow-hidden">
+      <header className={`flex-none flex items-center justify-between px-6 sm:px-8 h-16 border-b-4 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-blue-50'}`}>
+        <div className="flex items-center gap-4 overflow-hidden">
           <button 
             onClick={onClose}
-            className={`flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-3 rounded-2xl transition-all font-black text-xs sm:text-sm border-2 ${isDark ? 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-100'}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all font-black text-[10px] border-2 ${isDark ? 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-100'}`}
           >
-            <Home size={18} strokeWidth={3} />
-            <span className="hidden sm:inline">Exit</span>
+            <Home size={14} strokeWidth={3} />
+            <span className="hidden sm:inline uppercase tracking-widest">Home</span>
           </button>
           
-          <h2 className="font-display font-bold text-base sm:text-2xl truncate max-w-[200px] sm:max-w-md">
+          <h2 className="font-display font-bold text-lg truncate max-w-[150px] sm:max-w-md">
             {book.title}
           </h2>
         </div>
@@ -120,48 +120,48 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
         <div className="flex items-center gap-2">
           <button 
             onClick={toggleAmbiance}
-            className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl transition-all ${isAmbianceActive ? 'bg-indigo-100 text-indigo-600' : (isDark ? 'bg-slate-800 text-indigo-400' : 'bg-indigo-50 text-indigo-400')}`}
+            className={`p-2 rounded-xl transition-all ${isAmbianceActive ? 'bg-brand-blue text-white shadow-lg' : (isDark ? 'bg-slate-800 text-brand-blue' : 'bg-blue-50 text-brand-blue')}`}
           >
-            <Music size={20} />
+            <Music size={16} />
           </button>
           <button 
             onClick={toggleReading}
-            className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl transition-all ${isReadingAloud ? 'bg-fuchsia-100 text-fuchsia-600' : (isDark ? 'bg-slate-800 text-amber-400' : 'bg-amber-50 text-amber-400')}`}
+            className={`p-2 rounded-xl transition-all ${isReadingAloud ? 'bg-brand-purple text-white shadow-lg' : (isDark ? 'bg-slate-800 text-brand-purple' : 'bg-brand-purple/10 text-brand-purple')}`}
           >
-            {isReadingAloud ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            {isReadingAloud ? <VolumeX size={16} /> : <Volume2 size={16} />}
           </button>
         </div>
       </header>
 
       <div className={`flex-1 relative flex flex-col items-center justify-center p-4 sm:p-12 overflow-hidden ${isDark ? 'bg-slate-950' : 'bg-[#fdfbff]'}`}>
-        {/* Nav Overlays - Accessible hit areas */}
+        {/* Nav Overlays - Scaled icons */}
         <div className="absolute left-0 inset-y-0 w-12 sm:w-24 z-10 flex items-center justify-center pointer-events-none">
           <button 
             onClick={prev}
             disabled={currentPage === 0}
-            className="w-10 h-10 sm:w-16 sm:h-16 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-2xl disabled:opacity-0 transition-all pointer-events-auto border-4 border-transparent hover:scale-110 active:scale-95"
+            className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-2xl disabled:opacity-0 transition-all pointer-events-auto border-4 border-transparent hover:scale-110 active:scale-95"
           >
-            <ChevronLeft size={24} className="sm:size-10 text-indigo-600" />
+            <ChevronLeft size={20} className="text-brand-blue" />
           </button>
         </div>
 
         <div className="absolute right-0 inset-y-0 w-12 sm:w-24 z-10 flex items-center justify-center pointer-events-none">
           <button 
             onClick={next}
-            className="w-10 h-10 sm:w-16 sm:h-16 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-2xl transition-all pointer-events-auto border-4 border-transparent hover:scale-110 active:scale-95"
+            className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-2xl transition-all pointer-events-auto border-4 border-transparent hover:scale-110 active:scale-95"
           >
-            <ChevronRight size={24} className="sm:size-10 text-indigo-600" />
+            <ChevronRight size={20} className="text-brand-blue" />
           </button>
         </div>
 
         {isDone ? (
-          <div className={`max-w-xl w-full text-center p-8 sm:p-16 rounded-[3rem] border-8 animate-in zoom-in duration-500 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-purple-100'}`}>
-             <PartyPopper size={64} className="mx-auto mb-8 text-fuchsia-500 animate-bounce" />
+          <div className={`max-w-xl w-full text-center p-8 sm:p-16 rounded-[3rem] border-8 animate-in zoom-in duration-500 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-blue-50'}`}>
+             <PartyPopper size={48} className="mx-auto mb-8 text-brand-purple animate-bounce" />
              <h2 className="text-3xl sm:text-5xl font-display font-bold mb-6">MAGICAL!</h2>
              <p className="text-lg sm:text-2xl font-bold mb-10 opacity-70">You finished "{book.title}"!</p>
              <button 
               onClick={() => { setCurrentPage(0); setIsDone(false); }}
-              className="px-10 py-5 bg-indigo-600 text-white rounded-[2rem] font-black text-xl shadow-[0_8px_0_0_#4338ca] hover:translate-y-[2px] active:translate-y-[6px] transition-all"
+              className="px-10 py-5 bg-brand-blue text-white rounded-[2rem] font-black text-xl tactile-button shadow-xl shadow-brand-blue/20"
              >
                Read Again
              </button>
@@ -176,8 +176,8 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
               />
             </div>
             
-            <div className={`flex-1 min-h-0 p-6 sm:p-12 overflow-y-auto border-t-2 text-center flex items-center justify-center ${isDark ? 'border-slate-800' : 'border-slate-50'}`}>
-              <p className="text-xl sm:text-3xl lg:text-4xl font-display font-bold leading-relaxed max-w-3xl mx-auto">
+            <div className={`flex-1 min-h-0 p-6 sm:p-10 overflow-y-auto border-t-2 text-center flex items-center justify-center ${isDark ? 'border-slate-800' : 'border-slate-50'}`}>
+              <p className="text-lg sm:text-xl lg:text-2xl font-display font-bold leading-relaxed max-w-3xl mx-auto">
                 {book.pages[currentPage]}
               </p>
             </div>
@@ -185,24 +185,24 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
         )}
       </div>
 
-      <footer className={`flex-none px-6 py-4 border-t transition-colors ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-purple-50'}`}>
+      <footer className={`flex-none px-6 py-4 border-t transition-colors ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-blue-50'}`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
           <div className="flex-1 flex items-center gap-4">
-            <div className="flex-1 h-3 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+            <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 transition-all duration-700"
+                className="h-full bg-gradient-to-r from-brand-blue to-brand-purple transition-all duration-700"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <span className="text-xs font-black text-slate-400 whitespace-nowrap">
+            <span className="text-[10px] font-black text-slate-400 whitespace-nowrap uppercase tracking-widest">
               {currentPage + 1} / {totalPages}
             </span>
           </div>
           <button 
             onClick={() => { playSound('pop'); window.print(); }}
-            className={`hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm border-2 ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600'}`}
+            className={`hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs border-2 ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-100 text-slate-600'}`}
           >
-            <Download size={18} /> Save Story
+            <Download size={14} /> Save
           </button>
         </div>
       </footer>

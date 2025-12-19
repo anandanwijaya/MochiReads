@@ -1,7 +1,8 @@
+
 import React, { useState, useMemo, useRef } from 'react';
 import { Book, Category, Level, LanguageFilter, AppLanguage } from '../types';
 import BookCard from './BookCard';
-import { Sparkles, Globe, Filter, Loader2, ChevronRight, PawPrint, Atom, Compass, Scroll, Heart, Star, LayoutGrid, ChevronLeft, RotateCcw } from 'lucide-react';
+import { Sparkles, Globe, Filter, ChevronRight, PawPrint, Atom, Compass, Scroll, Heart, Star, LayoutGrid, ChevronLeft, RotateCcw } from 'lucide-react';
 import { playSound } from './SoundEffects';
 import { getTranslation } from '../i18n';
 
@@ -23,56 +24,12 @@ interface BookGridProps {
   user?: any;
 }
 
-interface CategoryCardMeta {
-  id: Category;
-  icon: React.ReactNode;
-  color: string;
-  bg: string;
-  image: string;
-  description: string;
-}
-
-const CATEGORY_META: CategoryCardMeta[] = [
-  { 
-    id: 'Animal Stories', 
-    icon: <PawPrint size={24} />, 
-    color: 'text-orange-500', 
-    bg: 'bg-orange-50 dark:bg-orange-950/20',
-    image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,animal?lock=101',
-    description: 'Meet furry & scaly friends!'
-  },
-  { 
-    id: 'Science', 
-    icon: <Atom size={24} />, 
-    color: 'text-blue-500', 
-    bg: 'bg-blue-50 dark:bg-blue-950/20',
-    image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,science?lock=202',
-    description: 'Explore our amazing world.'
-  },
-  { 
-    id: 'Adventure', 
-    icon: <Compass size={24} />, 
-    color: 'text-emerald-500', 
-    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,adventure?lock=303',
-    description: 'Journey to far-off places!'
-  },
-  { 
-    id: 'Folk Tales', 
-    icon: <Scroll size={24} />, 
-    color: 'text-amber-500', 
-    bg: 'bg-amber-50 dark:bg-amber-950/20',
-    image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,fairytale?lock=404',
-    description: 'Stories from long ago.'
-  },
-  { 
-    id: 'Life Skills', 
-    icon: <Heart size={24} />, 
-    color: 'text-rose-500', 
-    bg: 'bg-rose-50 dark:bg-rose-950/20',
-    image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,friendship?lock=505',
-    description: 'Grow, share, and be kind.'
-  },
+const CATEGORY_META = [
+  { id: 'Animal Stories', icon: <PawPrint size={20} />, color: 'text-purple-500', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,animal?lock=101' },
+  { id: 'Science', icon: <Atom size={20} />, color: 'text-purple-500', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,science?lock=202' },
+  { id: 'Adventure', icon: <Compass size={20} />, color: 'text-purple-500', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,adventure?lock=303' },
+  { id: 'Folk Tales', icon: <Scroll size={20} />, color: 'text-purple-500', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,fairytale?lock=404' },
+  { id: 'Life Skills', icon: <Heart size={20} />, color: 'text-purple-500', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,friendship?lock=505' },
 ];
 
 export const BookShelf: React.FC<{
@@ -83,8 +40,7 @@ export const BookShelf: React.FC<{
   favorites?: string[];
   theme: 'light' | 'dark';
   icon?: React.ReactNode;
-  onSeeAll?: () => void;
-}> = ({ title, books, onRead, onToggleFavorite, favorites = [], theme, icon, onSeeAll }) => {
+}> = ({ title, books, onRead, onToggleFavorite, favorites = [], theme, icon }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isDark = theme === 'dark';
 
@@ -100,52 +56,35 @@ export const BookShelf: React.FC<{
   if (books.length === 0) return null;
 
   return (
-    <div className="space-y-6 mb-16 relative">
-      <div className="flex items-center justify-between px-2">
-        <div className="flex items-center gap-3">
-          {icon && <div className="text-indigo-500">{icon}</div>}
-          <h3 className={`text-2xl font-display font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
+    <div className="space-y-6 mb-20 w-full animate-in fade-in duration-500">
+      <div className="flex items-center justify-between px-4 sm:px-12">
+        <div className="flex items-center gap-4">
+          <div className="p-2 bg-brand-lavender dark:bg-slate-800 rounded-xl text-brand-purple border-2 border-white dark:border-slate-700 shadow-sm">
+            {icon ? React.cloneElement(icon as React.ReactElement, { size: 18 }) : <Sparkles size={18} />}
+          </div>
+          <h3 className={`text-2xl sm:text-3xl font-display font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>
             {title}
           </h3>
         </div>
-        {onSeeAll && (
-          <button 
-            onClick={onSeeAll}
-            className="text-sm font-black text-indigo-500 uppercase tracking-widest flex items-center gap-1.5 hover:translate-x-1 transition-transform"
-          >
-            See All <ChevronRight size={16} />
-          </button>
-        )}
       </div>
 
-      <div className="relative group">
+      <div className="relative group/shelf px-4 sm:px-12">
         <div 
           ref={scrollRef}
-          className="flex gap-6 overflow-x-auto no-scrollbar pb-8 px-2 snap-x snap-mandatory"
+          className="flex gap-6 overflow-x-auto no-scrollbar pb-8 snap-x snap-mandatory"
         >
           {books.map((book) => (
-            <div key={book.id} className="w-[320px] flex-shrink-0 snap-start">
-              <BookCard 
-                book={book} 
-                onRead={onRead} 
-                isFavorite={favorites.includes(book.id)} 
-                onToggleFavorite={onToggleFavorite} 
-              />
+            <div key={book.id} className="w-[280px] sm:w-[320px] flex-shrink-0 snap-start">
+              <BookCard book={book} onRead={onRead} isFavorite={favorites.includes(book.id)} onToggleFavorite={onToggleFavorite} />
             </div>
           ))}
         </div>
         
-        <button 
-          onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 rounded-full bg-white dark:bg-slate-800 shadow-xl border-2 border-slate-100 dark:border-slate-700 items-center justify-center text-slate-400 hover:text-indigo-600 z-10 hidden group-hover:flex transition-all"
-        >
-          <ChevronLeft size={24} />
+        <button onClick={() => scroll('left')} className="absolute left-6 sm:left-14 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl items-center justify-center text-brand-purple z-10 hidden group-hover/shelf:flex hover:scale-105 transition-all border-2 border-brand-lavender dark:border-slate-700">
+          <ChevronLeft size={22} />
         </button>
-        <button 
-          onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 rounded-full bg-white dark:bg-slate-800 shadow-xl border-2 border-slate-100 dark:border-slate-700 items-center justify-center text-slate-400 hover:text-indigo-600 z-10 hidden group-hover:flex transition-all"
-        >
-          <ChevronRight size={24} />
+        <button onClick={() => scroll('right')} className="absolute right-6 sm:right-14 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl items-center justify-center text-brand-purple z-10 hidden group-hover/shelf:flex hover:scale-105 transition-all border-2 border-brand-lavender dark:border-slate-700">
+          <ChevronRight size={22} />
         </button>
       </div>
     </div>
@@ -154,209 +93,129 @@ export const BookShelf: React.FC<{
 
 const BookGrid: React.FC<BookGridProps> = ({ 
   books, onRead, 
-  selectedCategory = 'All', 
-  setSelectedCategory = (_cat: Category) => {},
-  selectedLevel = 'All', 
-  setSelectedLevel = (_lvl: Level) => {}, 
-  selectedLanguageFilter = 'All', 
-  setSelectedLanguageFilter = (_lang: LanguageFilter) => {},
+  selectedCategory = 'All', setSelectedCategory = (_c: Category) => {},
+  selectedLevel = 'All', setSelectedLevel = (_l: Level) => {}, 
+  selectedLanguageFilter = 'All', setSelectedLanguageFilter = (_lg: LanguageFilter) => {},
   onToggleFavorite, favorites = [],
-  hideFilters = false, theme, language, onSeed, user
+  hideFilters = false, theme
 }) => {
   const isDark = theme === 'dark';
-  const [isSeeding, setIsSeeding] = useState(false);
-  
   const hasActiveFilters = selectedCategory !== 'All' || selectedLevel !== 'All' || selectedLanguageFilter !== 'All';
 
-  const resetAllFilters = () => {
-    playSound('woosh');
-    setSelectedCategory('All');
-    setSelectedLevel('All');
-    setSelectedLanguageFilter('All');
+  const resetAllFilters = () => { 
+    playSound('woosh'); 
+    setSelectedCategory('All'); 
+    setSelectedLevel('All'); 
+    setSelectedLanguageFilter('All'); 
   };
 
-  const filteredBooks = hideFilters 
-    ? books 
-    : books.filter(book => {
-        const categoryMatch = selectedCategory === 'All' || book.tags.includes(selectedCategory);
-        const levelMatch = selectedLevel === 'All' || book.level.toString() === selectedLevel;
-        
-        if (selectedLanguageFilter === 'All') return categoryMatch && levelMatch;
-        
-        const bookLang = book.language.toLowerCase();
-        const filterLang = selectedLanguageFilter.toLowerCase();
-        
-        const languageMatch = bookLang.includes(filterLang) || 
-          (selectedLanguageFilter === 'Indonesian' && (bookLang === 'indonesia' || bookLang === 'id')) ||
-          (selectedLanguageFilter === 'Malay' && (bookLang === 'malay' || bookLang === 'ms')) ||
-          (selectedLanguageFilter === 'Chinese' && (bookLang === 'chinese' || bookLang === 'zh' || bookLang === 'mandarin'));
-          
-        return categoryMatch && levelMatch && languageMatch;
-      });
+  const filteredBooks = hideFilters ? books : books.filter(book => {
+    const categoryMatch = selectedCategory === 'All' || book.tags.includes(selectedCategory);
+    const levelMatch = selectedLevel === 'All' || book.level.toString() === selectedLevel;
+    const languageMatch = selectedLanguageFilter === 'All' || book.language.toLowerCase().includes(selectedLanguageFilter.toLowerCase());
+    return categoryMatch && levelMatch && languageMatch;
+  });
 
-  const availableLanguages = useMemo(() => {
-    return ['All', 'English', 'Malay', 'Indonesian', 'Chinese', 'Thai', 'Japanese', 'Korean', 'Tagalog', 'Lao', 'Khmer', 'Arabic', 'German', 'French', 'Spanish', 'Dutch', 'Russian', 'Italian', 'Portuguese', 'Turkish'];
-  }, []);
-
-  const handleFilterClick = () => playSound('pop');
+  const languages = ['All', 'English', 'Malay', 'Indonesian', 'Chinese', 'Thai', 'Japanese', 'Korean', 'Spanish', 'French'];
 
   return (
-    <section className="pb-24">
+    <section className="w-full pb-24">
       {!hideFilters && (
-        <div className="space-y-12 mb-20 animate-in fade-in slide-in-from-bottom-6 duration-700">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between px-2">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-indigo-500 rounded-2xl text-white shadow-lg rotate-3">
-                  <Star size={24} fill="currentColor" strokeWidth={0} />
-                </div>
-                <h3 className={`text-3xl font-display font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                  Explore Topics
-                </h3>
-              </div>
-              
+        <div className="w-full px-4 sm:px-12 mb-12 space-y-10 animate-in slide-up duration-500">
+          {/* Category Hub - No Opacity Blur */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className={`text-lg font-display font-black tracking-tighter ${isDark ? 'text-white' : 'text-slate-800'}`}>Topics</h3>
               {hasActiveFilters && (
-                <button 
-                  onClick={resetAllFilters}
-                  className="text-sm font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 px-4 py-2 rounded-xl transition-all"
-                >
-                  <RotateCcw size={16} />
-                  Reset All Filters
+                <button onClick={resetAllFilters} className="text-[8px] font-black text-brand-purple uppercase tracking-widest flex items-center gap-2 hover:bg-brand-purple/10 px-3 py-1 rounded-full transition-all">
+                  <RotateCcw size={10} /> Clear
                 </button>
               )}
             </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
-              {CATEGORY_META.map((cat, idx) => (
+            <div className="flex overflow-x-auto no-scrollbar gap-5 pb-2">
+              {CATEGORY_META.map((cat) => (
                 <button
                   key={cat.id}
-                  onClick={() => { handleFilterClick(); setSelectedCategory(cat.id); }}
-                  className={`group relative flex flex-col p-4 sm:p-5 rounded-[2.5rem] border-4 transition-all duration-500 text-left overflow-hidden h-full tactile-button ${
-                    selectedCategory === cat.id 
-                      ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20 shadow-2xl scale-[1.02]' 
-                      : (isDark ? 'bg-slate-900 border-slate-800 hover:border-slate-600 hover:-translate-y-2' : 'bg-white border-slate-100 hover:border-indigo-200 hover:-translate-y-2 hover:shadow-xl shadow-sm')
-                  }`}
-                  style={{ animationDelay: `${idx * 100}ms` }}
+                  onClick={() => { playSound('pop'); setSelectedCategory(cat.id as Category); }}
+                  className={`group flex flex-col items-center min-w-[110px] sm:min-w-[140px] p-0.5 transition-all ${selectedCategory === cat.id ? 'scale-105' : 'hover:scale-105'}`}
                 >
-                  <div className="aspect-square w-full rounded-[2rem] overflow-hidden mb-5 relative bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-700 shadow-inner shrink-0">
-                    <img src={cat.image} alt={cat.id} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                    <div className={`absolute top-3 right-3 p-2.5 rounded-2xl backdrop-blur-md bg-white/90 dark:bg-slate-800/90 shadow-lg ${cat.color} group-hover:rotate-12 transition-transform`}>
-                      {cat.icon}
-                    </div>
+                  <div className={`w-full aspect-square rounded-2xl overflow-hidden mb-2 border-2 transition-all ${selectedCategory === cat.id ? 'border-brand-purple shadow-md' : 'border-white dark:border-slate-800 shadow-sm'}`}>
+                    <img src={cat.image} className="w-full h-full object-cover" alt={cat.id} />
                   </div>
-                  <div className="flex flex-col flex-1">
-                    <h4 className={`font-display font-bold text-xl mb-1 truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{cat.id}</h4>
-                    <p className="text-[11px] font-bold text-slate-400 leading-tight">{cat.description}</p>
-                  </div>
+                  <span className={`text-[9px] font-black uppercase tracking-widest text-center ${selectedCategory === cat.id ? 'text-brand-purple' : 'text-slate-500'}`}>{cat.id}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          <div className={`flex flex-col lg:flex-row lg:items-center gap-8 p-6 lg:p-8 rounded-[3rem] border-4 transition-colors ${
-            isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-magic-sky/40 border-white shadow-inner'
+          {/* Slim Unified Filter Dashboard - Solid Background, No Blur */}
+          <div className={`flex flex-col xl:flex-row items-stretch xl:items-center gap-4 p-3 rounded-2xl border-2 shadow-lg transition-all ${
+            isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-white shadow-purple-500/5'
           }`}>
-            {/* Language Section */}
-            <div className="flex items-center gap-4 flex-1 min-w-0 relative">
-              <div className="flex items-center gap-2.5 text-slate-500 font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] shrink-0">
-                <Globe size={18} className="text-indigo-400" />
-                <span>Language</span>
-              </div>
-              
-              <div className="relative flex-1 min-w-0 overflow-hidden">
-                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-1 snap-x snap-mandatory">
-                  {availableLanguages.map((lang) => (
-                    <button
-                      key={lang}
-                      onClick={() => { handleFilterClick(); setSelectedLanguageFilter(lang as LanguageFilter); }}
-                      className={`px-5 py-2.5 rounded-2xl text-[11px] font-black transition-all whitespace-nowrap border-2 tactile-button snap-start ${
-                        selectedLanguageFilter === lang 
-                          ? 'bg-indigo-600 border-indigo-600 text-white shadow-indigo-200' 
-                          : (isDark ? 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700' : 'bg-white border-slate-100 text-slate-500 hover:border-indigo-100')
-                      }`}
-                    >
-                      {lang}
-                    </button>
-                  ))}
-                </div>
-                {/* Visual fading masks for scroll indicators */}
-                <div className={`absolute top-0 bottom-0 left-0 w-8 pointer-events-none transition-opacity duration-300 bg-gradient-to-r from-magic-sky/60 dark:from-slate-900/60 to-transparent`} />
-                <div className={`absolute top-0 bottom-0 right-0 w-8 pointer-events-none transition-opacity duration-300 bg-gradient-to-l from-magic-sky/60 dark:from-slate-900/60 to-transparent`} />
-              </div>
+            <div className="flex-1 flex items-center gap-4 px-5 py-2.5 rounded-xl bg-white/40 dark:bg-slate-800/30 overflow-hidden border border-transparent dark:border-slate-700/50">
+               <Globe size={16} className="text-brand-purple shrink-0" />
+               <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+                 {languages.map(lang => (
+                   <button
+                    key={lang}
+                    onClick={() => { playSound('pop'); setSelectedLanguageFilter(lang as LanguageFilter); }}
+                    className={`px-4 py-1.5 rounded-lg text-[9px] font-black transition-all border border-transparent tactile-button ${
+                      selectedLanguageFilter === lang 
+                        ? 'bg-brand-purple text-white shadow-sm' 
+                        : (isDark ? 'bg-slate-800/50 text-slate-400 hover:bg-slate-800' : 'bg-white text-slate-500 hover:bg-purple-50')
+                    }`}
+                   >
+                    {lang}
+                   </button>
+                 ))}
+               </div>
             </div>
 
-            {/* Separator - Only visible on desktop row layout */}
-            <div className="h-10 w-[2px] bg-slate-200 dark:bg-slate-800 hidden lg:block rounded-full shrink-0" />
-
-            {/* Level Section */}
-            <div className="flex items-center gap-5 shrink-0">
-              <div className="flex items-center gap-2.5 text-slate-500 font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] shrink-0">
-                <Filter size={18} className="text-amber-400" />
-                <span>Level</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {['All', '1', '2', '3', '4', '5'].map((lvl) => (
-                  <button
+            <div className="flex items-center gap-4 px-5 py-2.5 rounded-xl bg-brand-purple/5 border border-brand-purple/20 shrink-0">
+               <Filter size={16} className="text-brand-purple" />
+               <div className="flex items-center gap-1.5">
+                 {['All', '1', '2', '3', '4', '5'].map((lvl) => (
+                   <button
                     key={lvl}
-                    onClick={() => { handleFilterClick(); setSelectedLevel(lvl as Level); }}
-                    className={`w-11 h-11 flex items-center justify-center rounded-2xl text-[11px] font-black transition-all border-2 tactile-button ${
+                    onClick={() => { playSound('pop'); setSelectedLevel(lvl as Level); }}
+                    className={`flex items-center justify-center rounded-lg font-black transition-all border border-transparent w-8 h-8 text-[10px] tactile-button ${
                       selectedLevel === lvl 
-                        ? 'bg-amber-500 border-amber-500 text-white shadow-amber-200' 
-                        : (isDark ? 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700' : 'bg-white border-slate-100 text-slate-500 hover:border-amber-100')
+                        ? 'bg-brand-purple text-white shadow-sm' 
+                        : (isDark ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-white text-slate-500 hover:bg-brand-purple/10')
                     }`}
-                  >
+                   >
                     {lvl === 'All' ? '∞' : lvl}
-                  </button>
-                ))}
-              </div>
+                   </button>
+                 ))}
+               </div>
             </div>
           </div>
         </div>
       )}
 
-      <div className="mb-8">
-        <h4 className={`text-xl font-display font-bold mb-6 px-2 ${isDark ? 'text-white' : 'text-slate-700'}`}>
-          {!hasActiveFilters 
-            ? 'All Stories' 
-            : `Search Results (${filteredBooks.length})`}
+      {/* Edge-to-Edge Grid Results */}
+      <div className="w-full px-4 sm:px-12">
+        <h4 className={`text-lg font-display font-black mb-8 px-2 flex items-center gap-3 ${isDark ? 'text-white' : 'text-slate-800'}`}>
+          <LayoutGrid className="text-brand-purple" size={18} />
+          {!hasActiveFilters ? 'Highlights' : `Found (${filteredBooks.length})`}
         </h4>
         
         {filteredBooks.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-10 gap-y-16 items-stretch">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
             {filteredBooks.map((book, idx) => (
-              <div key={book.id} className="animate-in fade-in zoom-in-95 duration-700 flex" style={{ animationDelay: `${idx * 80}ms` }}>
+              <div key={book.id} className="animate-in slide-up duration-500 flex" style={{ animationDelay: `${idx * 30}ms` }}>
                 <BookCard book={book} onRead={onRead} isFavorite={favorites.includes(book.id)} onToggleFavorite={onToggleFavorite} />
               </div>
             ))}
           </div>
         ) : (
-          <div className={`text-center py-24 px-10 rounded-[4rem] border-8 border-dashed animate-in fade-in zoom-in duration-500 ${
-            isDark ? 'bg-slate-900/40 border-slate-800' : 'bg-slate-50/80 border-slate-100 shadow-inner'
+          <div className={`text-center py-16 rounded-3xl border-2 border-dashed animate-in zoom-in duration-500 ${
+            isDark ? 'bg-slate-900/40 border-slate-800' : 'bg-slate-50 border-slate-200'
           }`}>
-            <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 bg-indigo-100 dark:bg-slate-800 text-indigo-500 animate-bounce">
-              <LayoutGrid size={40} />
-            </div>
-            <h3 className={`text-4xl font-display font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-800'}`}>The Shelves are Shy!</h3>
-            <p className="text-slate-400 font-bold text-lg mb-12 max-w-sm mx-auto leading-relaxed">No books found matching your current filters. Try resetting them or seeding the library!</p>
-            
-            <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <button
-                onClick={resetAllFilters}
-                className="px-10 py-5 bg-white dark:bg-slate-800 border-4 border-indigo-100 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 rounded-[2.5rem] font-black text-xl hover:bg-indigo-50 transition-all tactile-button"
-              >
-                Clear All Filters
-              </button>
-              {onSeed && user && (
-                <button
-                  onClick={async () => { setIsSeeding(true); playSound('pop'); await onSeed(); setIsSeeding(false); }}
-                  disabled={isSeeding}
-                  className="group relative px-10 py-5 bg-indigo-600 text-white rounded-[2.5rem] font-black text-xl tactile-button flex items-center justify-center gap-3 disabled:opacity-50 overflow-hidden shadow-xl shadow-indigo-500/20"
-                >
-                  {isSeeding ? <Loader2 className="animate-spin" /> : <Sparkles className="group-hover:animate-sparkle" />}
-                  Populate Full Global Library (76 Books)
-                </button>
-              )}
-            </div>
+            <Sparkles size={40} className="mx-auto mb-4 text-brand-purple animate-pulse" />
+            <h3 className={`text-2xl font-display font-black mb-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>No stories found... yet!</h3>
+            <p className="text-slate-400 font-bold text-xs mb-8 max-w-sm mx-auto leading-relaxed">The magic library couldn't find those books. Try changing your filters!</p>
+            <button onClick={resetAllFilters} className="px-8 py-3 bg-brand-purple text-white rounded-xl font-black text-base hover:scale-105 transition-all tactile-button">Reset Filters</button>
           </div>
         )}
       </div>

@@ -18,39 +18,50 @@
             },
             colors: {
               magic: {
-                blue: '#e0f2fe',
+                blue: '#f3e8ff',
                 purple: '#f3e8ff',
-                mint: '#d1fae5',
-                coral: '#fee2e2',
-                lemon: '#fef3c7',
+                mint: '#f3e8ff',
+                coral: '#f3e8ff',
+                lemon: '#f3e8ff',
               },
               brand: {
-                blue: '#2563eb', // Indigo 600
-                purple: '#9333ea', // Purple 600
-                sky: '#0ea5e9' // Sky 500
+                blue: '#a855f7', // Brighter candy purple
+                purple: '#a855f7',
+                lavender: '#f5f3ff',
+                violet: '#8b5cf6' // Smooth violet
               }
             },
             animation: {
               'bounce-slow': 'bounce 3s infinite',
-              'float': 'floating 3s ease-in-out infinite',
+              'float': 'floating 4s ease-in-out infinite',
               'pulse-soft': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'squish': 'squish 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-              'sparkle': 'sparkle 0.6s ease-out forwards',
-              'morph': 'morph 8s ease-in-out infinite',
+              'squish': 'squish 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              'sparkle': 'sparkle 0.8s ease-out forwards',
+              'morph': 'morph 12s ease-in-out infinite',
+              'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'fade-in': 'fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
             },
             keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              },
               floating: {
                 '0%, 100%': { transform: 'translateY(0px)' },
                 '50%': { transform: 'translateY(-15px)' },
               },
               squish: {
                 '0%': { transform: 'scale(1)' },
-                '30%': { transform: 'scale(1.1, 0.85)' },
+                '50%': { transform: 'scale(0.9, 1.1)' },
                 '100%': { transform: 'scale(1)' },
               },
               sparkle: {
                 '0%': { opacity: 0, transform: 'scale(0) rotate(0deg)' },
-                '50%': { opacity: 1, transform: 'scale(1.2) rotate(180deg)' },
+                '50%': { opacity: 1, transform: 'scale(1.4) rotate(180deg)' },
                 '100%': { opacity: 0, transform: 'scale(1) rotate(360deg)' },
               },
               morph: {
@@ -68,77 +79,67 @@
     <style>
       body {
         font-family: 'Quicksand', sans-serif;
-        transition: background-color 0.5s ease, color 0.5s ease;
+        transition: background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        background-color: #f5f3ff;
+        background-image: 
+          radial-gradient(at 0% 0%, hsla(273,100%,97%,1) 0, transparent 50%), 
+          radial-gradient(at 100% 0%, hsla(273,100%,96%,1) 0, transparent 50%),
+          radial-gradient(at 50% 100%, hsla(273,80%,94%,1) 0, transparent 50%);
+        background-attachment: fixed;
       }
       .dark body {
-        background-color: #020617;
+        background-color: #0c061a;
         background-image: 
-          radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-          radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
-          radial-gradient(at 100% 0%, hsla(260,31%,25%,0.2) 0, transparent 50%);
-      }
-      body:not(.dark) {
-        background-color: #f8fafc;
-        background-image: 
-          radial-gradient(at 0% 0%, hsla(210,100%,96%,1) 0, transparent 50%), 
-          radial-gradient(at 50% 0%, hsla(255,100%,96%,1) 0, transparent 50%), 
-          radial-gradient(at 100% 0%, hsla(210,100%,96%,1) 0, transparent 50%);
+          radial-gradient(at 0% 0%, hsla(273,50%,12%,1) 0, transparent 50%), 
+          radial-gradient(at 100% 0%, hsla(273,50%,10%,1) 0, transparent 50%),
+          radial-gradient(at 50% 100%, hsla(273,50%,12%,1) 0, transparent 50%);
       }
       
       .tactile-button {
-        box-shadow: 0 8px 0 0 rgba(0,0,0,0.1);
-        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       }
       .tactile-button:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 0 0 rgba(0,0,0,0.08);
+        transform: translateY(-2px);
       }
       .tactile-button:active {
-        transform: translateY(6px) scale(0.96);
-        box-shadow: 0 2px 0 0 rgba(0,0,0,0.1);
-      }
-
-      .sticker-border {
-        border-width: 8px;
-        border-style: solid;
-      }
-
-      .puffy-shadow {
-        box-shadow: 0 20px 40px -15px rgba(37, 99, 235, 0.15);
+        transform: translateY(2px) scale(0.98);
       }
 
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-      .magic-text {
-        background: linear-gradient(to right, #2563eb, #9333ea, #0ea5e9);
+      .magic-purple-text {
+        background: linear-gradient(to right, #a855f7, #6366f1, #d946ef);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-size: 200% auto;
-        animation: gradient-flow 4s linear infinite;
+        animation: gradient-flow 6s linear infinite;
       }
 
       @keyframes gradient-flow {
         0% { background-position: 0% center; }
         100% { background-position: 200% center; }
       }
-    </style>
-    <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@^19.2.3",
-        "react-dom": "https://esm.sh/react-dom@^19.2.3",
-        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-        "react/": "https://esm.sh/react@^19.2.3/",
-        "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
-        "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
-        "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.48.1",
-        "jose": "https://esm.sh/jose@5.2.3"
+
+      .smooth-image-hover {
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       }
-    }
-    </script>
-  </head>
-  <body class="text-slate-900 dark:text-slate-100 overflow-x-hidden">
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "react": "https://esm.sh/react@^19.2.3",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.89.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "jose": "https://esm.sh/jose@^6.1.3"
+  }
+}
+</script>
+</head>
+  <body class="text-slate-800 dark:text-slate-100 overflow-x-hidden">
     <div id="root"></div>
     <script type="module" src="index.tsx"></script>
   </body>
