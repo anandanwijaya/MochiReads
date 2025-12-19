@@ -1,8 +1,8 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Book, Category, Level, LanguageFilter, AppLanguage } from '../types';
 import BookCard from './BookCard';
-import { Sparkles, Globe, Filter, Loader2, ChevronRight, PawPrint, Atom, Compass, Scroll, Heart, Star, LayoutGrid } from 'lucide-react';
+import { Sparkles, Globe, Filter, Loader2, ChevronRight, PawPrint, Atom, Compass, Scroll, Heart, Star, LayoutGrid, ChevronLeft } from 'lucide-react';
 import { playSound } from './SoundEffects';
 import { getTranslation } from '../i18n';
 
@@ -75,6 +75,83 @@ const CATEGORY_META: CategoryCardMeta[] = [
   },
 ];
 
+export const BookShelf: React.FC<{
+  title: string;
+  books: Book[];
+  onRead: (book: Book) => void;
+  onToggleFavorite?: (e: React.MouseEvent, bookId: string) => void;
+  favorites?: string[];
+  theme: 'light' | 'dark';
+  icon?: React.ReactNode;
+  onSeeAll?: () => void;
+}> = ({ title, books, onRead, onToggleFavorite, favorites = [], theme, icon, onSeeAll }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isDark = theme === 'dark';
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
+      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+      playSound('woosh');
+    }
+  };
+
+  if (books.length === 0) return null;
+
+  return (
+    <div className="space-y-6 mb-16 relative">
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-3">
+          {icon && <div className="text-indigo-500">{icon}</div>}
+          <h3 className={`text-2xl font-display font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
+            {title}
+          </h3>
+        </div>
+        {onSeeAll && (
+          <button 
+            onClick={onSeeAll}
+            className="text-sm font-black text-indigo-500 uppercase tracking-widest flex items-center gap-1.5 hover:translate-x-1 transition-transform"
+          >
+            See All <ChevronRight size={16} />
+          </button>
+        )}
+      </div>
+
+      <div className="relative group">
+        <div 
+          ref={scrollRef}
+          className="flex gap-6 overflow-x-auto no-scrollbar pb-8 px-2 snap-x snap-mandatory"
+        >
+          {books.map((book) => (
+            <div key={book.id} className="w-[280px] flex-shrink-0 snap-start">
+              <BookCard 
+                book={book} 
+                onRead={onRead} 
+                isFavorite={favorites.includes(book.id)} 
+                onToggleFavorite={onToggleFavorite} 
+              />
+            </div>
+          ))}
+        </div>
+        
+        <button 
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 rounded-full bg-white dark:bg-slate-800 shadow-xl border-2 border-slate-100 dark:border-slate-700 items-center justify-center text-slate-400 hover:text-indigo-600 z-10 hidden group-hover:flex transition-all"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <button 
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 rounded-full bg-white dark:bg-slate-800 shadow-xl border-2 border-slate-100 dark:border-slate-700 items-center justify-center text-slate-400 hover:text-indigo-600 z-10 hidden group-hover:flex transition-all"
+        >
+          <ChevronRight size={24} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const BookGrid: React.FC<BookGridProps> = ({ 
   books, onRead, 
   selectedCategory = 'All', 
@@ -125,7 +202,7 @@ const BookGrid: React.FC<BookGridProps> = ({
                   <Star size={24} fill="currentColor" strokeWidth={0} />
                 </div>
                 <h3 className={`text-3xl font-display font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                  Choose an Adventure
+                  Explore by Topic
                 </h3>
               </div>
               {selectedCategory !== 'All' && (
@@ -133,7 +210,7 @@ const BookGrid: React.FC<BookGridProps> = ({
                   onClick={() => { playSound('woosh'); setSelectedCategory('All'); }}
                   className="text-sm font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform"
                 >
-                  View All <ChevronRight size={18} />
+                  Clear Category <ChevronRight size={18} />
                 </button>
               )}
             </div>
@@ -217,44 +294,52 @@ const BookGrid: React.FC<BookGridProps> = ({
         </div>
       )}
 
-      {filteredBooks.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-10 gap-y-16 items-stretch">
-          {filteredBooks.map((book, idx) => (
-            <div key={book.id} className="animate-in fade-in zoom-in-95 duration-700 flex" style={{ animationDelay: `${idx * 80}ms` }}>
-              <BookCard book={book} onRead={onRead} isFavorite={favorites.includes(book.id)} onToggleFavorite={onToggleFavorite} />
+      <div className="mb-8">
+        <h4 className={`text-xl font-display font-bold mb-6 px-2 ${isDark ? 'text-white' : 'text-slate-700'}`}>
+          {selectedCategory === 'All' && selectedLanguageFilter === 'All' && selectedLevel === 'All' 
+            ? 'All Stories' 
+            : `Search Results (${filteredBooks.length})`}
+        </h4>
+        
+        {filteredBooks.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-10 gap-y-16 items-stretch">
+            {filteredBooks.map((book, idx) => (
+              <div key={book.id} className="animate-in fade-in zoom-in-95 duration-700 flex" style={{ animationDelay: `${idx * 80}ms` }}>
+                <BookCard book={book} onRead={onRead} isFavorite={favorites.includes(book.id)} onToggleFavorite={onToggleFavorite} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={`text-center py-24 px-10 rounded-[4rem] border-8 border-dashed animate-in fade-in zoom-in duration-500 ${
+            isDark ? 'bg-slate-900/40 border-slate-800' : 'bg-slate-50/80 border-slate-100 shadow-inner'
+          }`}>
+            <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 bg-indigo-100 dark:bg-slate-800 text-indigo-500 animate-bounce">
+              <LayoutGrid size={40} />
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className={`text-center py-24 px-10 rounded-[4rem] border-8 border-dashed animate-in fade-in zoom-in duration-500 ${
-          isDark ? 'bg-slate-900/40 border-slate-800' : 'bg-slate-50/80 border-slate-100 shadow-inner'
-        }`}>
-          <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 bg-indigo-100 dark:bg-slate-800 text-indigo-500 animate-bounce">
-            <LayoutGrid size={40} />
-          </div>
-          <h3 className={`text-4xl font-display font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-800'}`}>The Shelves are Shy!</h3>
-          <p className="text-slate-400 font-bold text-lg mb-12 max-w-sm mx-auto leading-relaxed">No books found in the database. Help populate the global library with 76 magical stories across all languages!</p>
-          
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <button
-              onClick={() => { playSound('pop'); setSelectedCategory('All'); setSelectedLevel('All'); setSelectedLanguageFilter('All'); }}
-              className="px-10 py-5 bg-white dark:bg-slate-800 border-4 border-indigo-100 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 rounded-[2.5rem] font-black text-xl hover:bg-indigo-50 transition-all tactile-button"
-            >
-              Clear Filters
-            </button>
-            {onSeed && (
+            <h3 className={`text-4xl font-display font-bold mb-4 ${isDark ? 'text-white' : 'text-slate-800'}`}>The Shelves are Shy!</h3>
+            <p className="text-slate-400 font-bold text-lg mb-12 max-w-sm mx-auto leading-relaxed">No books found matching your current filters. Try resetting them or seeding the library!</p>
+            
+            <div className="flex flex-col sm:flex-row justify-center gap-6">
               <button
-                onClick={async () => { setIsSeeding(true); playSound('pop'); await onSeed(); setIsSeeding(false); }}
-                disabled={isSeeding}
-                className="group relative px-10 py-5 bg-indigo-600 text-white rounded-[2.5rem] font-black text-xl tactile-button flex items-center justify-center gap-3 disabled:opacity-50 overflow-hidden shadow-xl shadow-indigo-500/20"
+                onClick={() => { playSound('pop'); setSelectedCategory('All'); setSelectedLevel('All'); setSelectedLanguageFilter('All'); }}
+                className="px-10 py-5 bg-white dark:bg-slate-800 border-4 border-indigo-100 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 rounded-[2.5rem] font-black text-xl hover:bg-indigo-50 transition-all tactile-button"
               >
-                {isSeeding ? <Loader2 className="animate-spin" /> : <Sparkles className="group-hover:animate-sparkle" />}
-                Populate Full Global Library (76 Books)
+                Clear Filters
               </button>
-            )}
+              {onSeed && (
+                <button
+                  onClick={async () => { setIsSeeding(true); playSound('pop'); await onSeed(); setIsSeeding(false); }}
+                  disabled={isSeeding}
+                  className="group relative px-10 py-5 bg-indigo-600 text-white rounded-[2.5rem] font-black text-xl tactile-button flex items-center justify-center gap-3 disabled:opacity-50 overflow-hidden shadow-xl shadow-indigo-500/20"
+                >
+                  {isSeeding ? <Loader2 className="animate-spin" /> : <Sparkles className="group-hover:animate-sparkle" />}
+                  Populate Full Global Library (76 Books)
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 };

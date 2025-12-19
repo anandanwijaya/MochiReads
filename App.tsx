@@ -1,8 +1,8 @@
 
-import { AlertCircle, ArrowRight, BookOpen, Check, Construction, Copy, Database, Loader2, ShieldAlert, Sparkles, Star, TableProperties, Zap, Globe, Trophy } from 'lucide-react';
+import { AlertCircle, ArrowRight, BookOpen, Check, Construction, Copy, Database, Loader2, ShieldAlert, Sparkles, Star, TableProperties, Zap, Globe, Trophy, TrendingUp, Clock, Heart } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AuthModal from './components/AuthModal';
-import BookGrid from './components/BookGrid';
+import BookGrid, { BookShelf } from './components/BookGrid';
 import BookReader from './components/BookReader';
 import BookUploadModal from './components/BookUploadModal';
 import Footer from './components/Footer';
@@ -145,7 +145,9 @@ const App: React.FC = () => {
     setActiveBook(book);
     setLatestRead(prev => {
       const filtered = prev.filter(id => id !== book.id);
-      return [book.id, ...filtered].slice(0, 10);
+      const updated = [book.id, ...filtered].slice(0, 10);
+      localStorage.setItem('mochi_latest', JSON.stringify(updated));
+      return updated;
     });
   };
 
@@ -177,6 +179,15 @@ const App: React.FC = () => {
     return books.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q));
   }, [books, searchQuery]);
 
+  // Curated Shelf Logic
+  const shelves = useMemo(() => {
+    const featured = books.filter(b => b.tags.includes('Top Pick')).slice(0, 12);
+    const magicLab = books.filter(b => b.author === 'The Magic Lab' || b.tags.includes('Magic Lab')).slice(0, 12);
+    const langSpecific = books.filter(b => b.language.toLowerCase().includes(selectedLanguageFilter.toLowerCase() === 'all' ? 'english' : selectedLanguageFilter.toLowerCase())).slice(0, 12);
+    
+    return { featured, magicLab, langSpecific };
+  }, [books, selectedLanguageFilter]);
+
   const finishedCount = readingProgress.filter(p => p.is_finished).length;
   const exploredLanguages = new Set(readingProgress.map(p => {
     const b = books.find(book => book.id === p.book_id);
@@ -189,7 +200,7 @@ const App: React.FC = () => {
         <div className="w-24 h-24 bg-indigo-600 rounded-[2rem] flex items-center justify-center animate-bounce shadow-xl mb-8">
           <BookOpen size={48} className="text-white" />
         </div>
-        <h2 className="text-2xl font-display font-bold">Magicking the Library...</h2>
+        <h2 className="text-2xl font-display font-bold animate-pulse">Magicking the Library...</h2>
       </div>
     );
   }
@@ -214,6 +225,7 @@ const App: React.FC = () => {
         onReadBook={handleReadBook}
       />
 
+      {/* Floating Global Progress / Achievements shortcut */}
       <div className="fixed top-24 left-6 z-[60] flex flex-col gap-4 pointer-events-none sm:pointer-events-auto">
         <button 
           onClick={() => handleNavigate('achievements')}
@@ -224,7 +236,7 @@ const App: React.FC = () => {
           }`}
         >
           <Trophy size={20} className="group-hover:rotate-12 transition-transform" />
-          <span className="text-xs font-black uppercase tracking-widest hidden md:inline">Adventure Map</span>
+          <span className="text-xs font-black uppercase tracking-widest hidden md:inline">My Map</span>
           {finishedCount > 0 && (
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] text-white animate-pulse">
               {finishedCount}
@@ -235,26 +247,67 @@ const App: React.FC = () => {
 
       <main className="w-full">
         {view === 'library' && (
-          <>
+          <div className="relative">
             <Hero onStartCreating={() => handleNavigate('creator')} language={language} theme={theme} />
-            <div id="library-section" className="pt-20 px-4 sm:px-8 lg:px-12">
-              <BookGrid 
-                books={filteredBySearch}
-                onRead={handleReadBook}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                selectedLevel={selectedLevel}
-                setSelectedLevel={setSelectedLevel}
-                selectedLanguageFilter={selectedLanguageFilter}
-                setSelectedLanguageFilter={setSelectedLanguageFilter}
-                onToggleFavorite={handleToggleFavorite}
-                favorites={favorites}
-                theme={theme}
-                language={language}
-                onSeed={triggerSeed}
-              />
+            
+            <div id="library-section" className="pt-20 px-4 sm:px-8 lg:px-12 space-y-24">
+              {/* Only show curated shelves if no search/filter is active */}
+              {searchQuery === '' && selectedCategory === 'All' && selectedLevel === 'All' && (
+                <div className="space-y-20">
+                  <BookShelf 
+                    title="Featured Stories" 
+                    books={shelves.featured} 
+                    onRead={handleReadBook} 
+                    onToggleFavorite={handleToggleFavorite}
+                    favorites={favorites}
+                    theme={theme}
+                    icon={<TrendingUp size={24} />}
+                  />
+
+                  <BookShelf 
+                    title={`New in ${selectedLanguageFilter === 'All' ? 'English' : selectedLanguageFilter}`} 
+                    books={shelves.langSpecific} 
+                    onRead={handleReadBook} 
+                    onToggleFavorite={handleToggleFavorite}
+                    favorites={favorites}
+                    theme={theme}
+                    icon={<Globe size={24} />}
+                    onSeeAll={() => {
+                       document.getElementById('main-grid')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  />
+
+                  <BookShelf 
+                    title="Created in Magic Lab" 
+                    books={shelves.magicLab} 
+                    onRead={handleReadBook} 
+                    onToggleFavorite={handleToggleFavorite}
+                    favorites={favorites}
+                    theme={theme}
+                    icon={<Sparkles size={24} />}
+                  />
+                </div>
+              )}
+
+              <div id="main-grid" className="scroll-mt-32">
+                <BookGrid 
+                  books={filteredBySearch}
+                  onRead={handleReadBook}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  selectedLevel={selectedLevel}
+                  setSelectedLevel={setSelectedLevel}
+                  selectedLanguageFilter={selectedLanguageFilter}
+                  setSelectedLanguageFilter={setSelectedLanguageFilter}
+                  onToggleFavorite={handleToggleFavorite}
+                  favorites={favorites}
+                  theme={theme}
+                  language={language}
+                  onSeed={triggerSeed}
+                />
+              </div>
             </div>
-          </>
+          </div>
         )}
 
         {view === 'achievements' && (
@@ -262,20 +315,37 @@ const App: React.FC = () => {
         )}
 
         {view === 'creator' && (
-          <div className="px-4 sm:px-8 lg:px-12">
+          <div className="px-4 sm:px-8 lg:px-12 min-h-screen">
             <StoryGenerator onStoryGenerated={(b) => { handleReadBook(b); fetchBooks(); }} language={language} theme={theme} />
           </div>
         )}
 
         {view === 'favorites' && (
-          <div className="py-12 px-4 sm:px-8 lg:px-12">
-            <h2 className="text-4xl font-display font-bold mb-12">{t('myFavorites')}</h2>
+          <div className="py-12 px-4 sm:px-8 lg:px-12 min-h-screen">
+            <div className="flex items-center gap-4 mb-12">
+               <div className="p-3 bg-rose-500 rounded-2xl text-white shadow-lg">
+                 <Heart size={32} fill="currentColor" />
+               </div>
+               <h2 className="text-4xl font-display font-bold">{t('myFavorites')}</h2>
+            </div>
             <BookGrid books={filteredBySearch.filter(b => favorites.includes(b.id))} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} />
           </div>
         )}
 
+        {view === 'latest' && (
+           <div className="py-12 px-4 sm:px-8 lg:px-12 min-h-screen">
+             <div className="flex items-center gap-4 mb-12">
+               <div className="p-3 bg-indigo-500 rounded-2xl text-white shadow-lg">
+                 <Clock size={32} />
+               </div>
+               <h2 className="text-4xl font-display font-bold">{t('recent')}</h2>
+            </div>
+            <BookGrid books={books.filter(b => latestRead.includes(b.id))} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} />
+           </div>
+        )}
+
         {view === 'progress' && (
-          <div className="py-12 px-4 sm:px-8 lg:px-12">
+          <div className="py-12 px-4 sm:px-8 lg:px-12 min-h-screen">
             <h2 className="text-4xl font-display font-bold mb-12">My Reading Journey</h2>
             <ReadingProgressTable progressRecords={readingProgress} books={books} onRead={handleReadBook} theme={theme} />
           </div>
