@@ -160,10 +160,10 @@ const App: React.FC = () => {
   if (loading) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-brand-lavender text-brand-purple'}`}>
-        <div className="w-16 h-16 bg-brand-purple rounded-2xl flex items-center justify-center animate-bounce shadow-xl mb-6 border-2 border-white">
-          <BookOpen size={32} className="text-white" strokeWidth={3} />
+        <div className="w-20 h-20 bg-brand-purple rounded-[2rem] flex items-center justify-center animate-bounce shadow-xl mb-10 border-4 border-white">
+          <BookOpen size={40} className="text-white" strokeWidth={3} />
         </div>
-        <h2 className="text-xl font-display font-black animate-pulse tracking-tight text-brand-purple">Summoning Stories...</h2>
+        <h2 className="text-2xl font-display font-black animate-pulse tracking-tight text-brand-purple">Summoning Stories...</h2>
       </div>
     );
   }
@@ -179,19 +179,19 @@ const App: React.FC = () => {
       />
 
       {/* Persistent Floating Badge - Purple Theme */}
-      <div className="fixed top-24 left-4 sm:left-6 z-[60] pointer-events-none sm:pointer-events-auto transition-all duration-500">
+      <div className="fixed top-28 left-6 sm:left-10 z-[60] pointer-events-none sm:pointer-events-auto transition-all duration-500">
         <button 
           onClick={() => handleNavigate('achievements')}
-          className={`group flex items-center gap-2 px-3.5 py-2.5 rounded-xl border-2 transition-all hover:scale-105 active:scale-95 tactile-button shadow-xl ${
+          className={`group flex items-center gap-3 px-5 py-3 rounded-2xl border-4 transition-all hover:scale-110 active:scale-95 tactile-button shadow-2xl ${
             view === 'achievements' 
               ? 'bg-brand-purple border-white text-white' 
               : (theme === 'dark' ? 'bg-slate-800/80 border-slate-700 text-brand-purple backdrop-blur-md' : 'bg-white/80 border-brand-lavender text-brand-purple backdrop-blur-md')
           }`}
         >
-          <Trophy size={16} className="group-hover:rotate-6 transition-transform" />
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] hidden lg:inline">Adventure Map</span>
+          <Trophy size={18} className="group-hover:rotate-6 transition-transform" />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden lg:inline">Adventure Map</span>
           {readingProgress.filter(p => p.is_finished).length > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white">
+            <span className="absolute -top-2 -right-2 w-5 h-5 bg-rose-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white">
               {readingProgress.filter(p => p.is_finished).length}
             </span>
           )}
@@ -204,9 +204,9 @@ const App: React.FC = () => {
             <div className="flex flex-col w-full">
               <Hero onStartCreating={() => handleNavigate('creator')} language={language} theme={theme} />
               
-              <div id="library-section" className="space-y-20 py-12 w-full">
+              <div id="library-section" className="space-y-32 py-16 w-full">
                 {searchQuery === '' && selectedCategory === 'All' && selectedLevel === 'All' && (
-                  <div className="space-y-20">
+                  <div className="space-y-32">
                     <BookShelf title="Magical Picks" books={shelves.featured} onRead={handleReadBook} onToggleFavorite={handleToggleFavorite} favorites={favorites} theme={theme} icon={<TrendingUp />} />
                     <BookShelf title={`${selectedLanguageFilter === 'All' ? 'English' : selectedLanguageFilter} Adventures`} books={shelves.langSpecific} onRead={handleReadBook} onToggleFavorite={handleToggleFavorite} favorites={favorites} theme={theme} icon={<Globe />} />
                     <BookShelf title="AI Lab Creations" books={shelves.magicLab} onRead={handleReadBook} onToggleFavorite={handleToggleFavorite} favorites={favorites} theme={theme} icon={<Sparkles />} />
@@ -234,11 +234,11 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {view === 'achievements' && <div className="py-16 px-4 sm:px-12 w-full"><Achievements finishedCount={readingProgress.filter(p => p.is_finished).length} languageCount={new Set(readingProgress.map(p => books.find(b => b.id === p.book_id)?.language)).size} theme={theme} /></div>}
-          {view === 'creator' && <div className="py-16 px-4 sm:px-12 w-full"><StoryGenerator onStoryGenerated={(b) => { handleReadBook(b); fetchBooks(); }} language={language} theme={theme} /></div>}
-          {view === 'favorites' && <div className="py-16 px-4 sm:px-12 w-full"><h2 className="text-2xl font-display font-black mb-10 flex items-center gap-4"><Heart fill="currentColor" className="text-rose-500" /> {t('myFavorites')}</h2><BookGrid books={filteredBySearch.filter(b => favorites.includes(b.id))} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} user={user} /></div>}
-          {view === 'latest' && <div className="py-16 px-4 sm:px-12 w-full"><h2 className="text-2xl font-display font-black mb-10 flex items-center gap-4"><Clock className="text-brand-purple" /> {t('recent')}</h2><BookGrid books={books.filter(b => latestRead.includes(b.id))} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} user={user} /></div>}
-          {view === 'progress' && <div className="py-16 px-4 sm:px-12 w-full"><h2 className="text-2xl font-display font-black mb-10 flex items-center gap-4"><TrendingUp className="text-brand-purple" /> My Adventure Map</h2><ReadingProgressTable progressRecords={readingProgress} books={books} onRead={handleReadBook} theme={theme} /></div>}
+          {view === 'achievements' && <div className="py-24 px-4 sm:px-12 w-full"><Achievements finishedCount={readingProgress.filter(p => p.is_finished).length} languageCount={new Set(readingProgress.map(p => books.find(b => b.id === p.book_id)?.language)).size} theme={theme} /></div>}
+          {view === 'creator' && <div className="py-24 px-4 sm:px-12 w-full"><StoryGenerator onStoryGenerated={(b) => { handleReadBook(b); fetchBooks(); }} language={language} theme={theme} /></div>}
+          {view === 'favorites' && <div className="py-24 px-4 sm:px-12 w-full"><h2 className="text-3xl font-display font-black mb-12 flex items-center gap-6"><Heart fill="currentColor" size={32} className="text-rose-500" /> {t('myFavorites')}</h2><BookGrid books={filteredBySearch.filter(b => favorites.includes(b.id))} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} user={user} /></div>}
+          {view === 'latest' && <div className="py-24 px-4 sm:px-12 w-full"><h2 className="text-3xl font-display font-black mb-12 flex items-center gap-6"><Clock size={32} className="text-brand-purple" /> {t('recent')}</h2><BookGrid books={books.filter(b => latestRead.includes(b.id))} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} user={user} /></div>}
+          {view === 'progress' && <div className="py-24 px-4 sm:px-12 w-full"><h2 className="text-3xl font-display font-black mb-12 flex items-center gap-6"><TrendingUp size={32} className="text-brand-purple" /> My Adventure Map</h2><ReadingProgressTable progressRecords={readingProgress} books={books} onRead={handleReadBook} theme={theme} /></div>}
         </div>
       </main>
 

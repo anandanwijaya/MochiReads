@@ -25,11 +25,11 @@ interface BookGridProps {
 }
 
 const CATEGORY_META = [
-  { id: 'Animal Stories', icon: <PawPrint size={20} />, color: 'text-purple-500', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,animal?lock=101' },
-  { id: 'Science', icon: <Atom size={20} />, color: 'text-purple-500', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,science?lock=202' },
-  { id: 'Adventure', icon: <Compass size={20} />, color: 'text-purple-500', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,adventure?lock=303' },
-  { id: 'Folk Tales', icon: <Scroll size={20} />, color: 'text-purple-500', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,fairytale?lock=404' },
-  { id: 'Life Skills', icon: <Heart size={20} />, color: 'text-purple-500', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,friendship?lock=505' },
+  { id: 'Animal Stories', icon: <PawPrint size={20} />, color: 'border-brand-rose', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,animal?lock=101' },
+  { id: 'Science', icon: <Atom size={20} />, color: 'border-brand-cyan', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,science?lock=202' },
+  { id: 'Adventure', icon: <Compass size={20} />, color: 'border-brand-amber', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,adventure?lock=303' },
+  { id: 'Folk Tales', icon: <Scroll size={20} />, color: 'border-brand-purple', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,fairytale?lock=404' },
+  { id: 'Life Skills', icon: <Heart size={20} />, color: 'border-magic-mint', image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,friendship?lock=505' },
 ];
 
 export const BookShelf: React.FC<{
@@ -122,7 +122,7 @@ const BookGrid: React.FC<BookGridProps> = ({
     <section className="w-full pb-24">
       {!hideFilters && (
         <div className="w-full px-4 sm:px-12 mb-12 space-y-10 animate-in slide-up duration-500">
-          {/* Category Hub - No Opacity Blur */}
+          {/* Category Hub - Rainbow Borders */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className={`text-lg font-display font-black tracking-tighter ${isDark ? 'text-white' : 'text-slate-800'}`}>Topics</h3>
@@ -139,7 +139,7 @@ const BookGrid: React.FC<BookGridProps> = ({
                   onClick={() => { playSound('pop'); setSelectedCategory(cat.id as Category); }}
                   className={`group flex flex-col items-center min-w-[110px] sm:min-w-[140px] p-0.5 transition-all ${selectedCategory === cat.id ? 'scale-105' : 'hover:scale-105'}`}
                 >
-                  <div className={`w-full aspect-square rounded-2xl overflow-hidden mb-2 border-2 transition-all ${selectedCategory === cat.id ? 'border-brand-purple shadow-md' : 'border-white dark:border-slate-800 shadow-sm'}`}>
+                  <div className={`w-full aspect-square rounded-2xl overflow-hidden mb-2 border-2 transition-all ${selectedCategory === cat.id ? `${cat.color} shadow-md border-4` : 'border-white dark:border-slate-800 shadow-sm'}`}>
                     <img src={cat.image} className="w-full h-full object-cover" alt={cat.id} />
                   </div>
                   <span className={`text-[9px] font-black uppercase tracking-widest text-center ${selectedCategory === cat.id ? 'text-brand-purple' : 'text-slate-500'}`}>{cat.id}</span>

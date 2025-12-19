@@ -13,10 +13,10 @@ const Achievements: React.FC<AchievementsProps> = ({ finishedCount, languageCoun
   const isDark = theme === 'dark';
 
   const badges = [
-    { id: 'first-step', title: 'First Adventure', icon: <Map className="text-brand-purple" />, desc: 'Finished 1 story!', requirement: 1 },
-    { id: 'bookworm', title: 'Super Reader', icon: <Heart className="text-rose-500" />, desc: 'Finished 5 stories!', requirement: 5 },
-    { id: 'librarian', title: 'Library Legend', icon: <Trophy className="text-brand-purple" />, desc: 'Finished 10 stories!', requirement: 10 },
-    { id: 'polyglot', title: 'World Traveler', icon: <Globe className="text-brand-violet" />, desc: 'Read in 3 languages!', requirement: 3, type: 'lang' },
+    { id: 'first-step', title: 'First Adventure', icon: <Map className="text-brand-rose" />, desc: 'Finished 1 story!', requirement: 1 },
+    { id: 'bookworm', title: 'Super Reader', icon: <Heart className="text-brand-rose" />, desc: 'Finished 5 stories!', requirement: 5 },
+    { id: 'librarian', title: 'Library Legend', icon: <Trophy className="text-brand-amber" />, desc: 'Finished 10 stories!', requirement: 10 },
+    { id: 'polyglot', title: 'World Traveler', icon: <Globe className="text-brand-cyan" />, desc: 'Read in 3 languages!', requirement: 3, type: 'lang' },
     { id: 'creator', title: 'Magic Maker', icon: <Zap className="text-brand-purple" />, desc: 'Created 1 story!', requirement: 1, type: 'create' },
   ];
 
@@ -77,20 +77,20 @@ const Achievements: React.FC<AchievementsProps> = ({ finishedCount, languageCoun
         })}
       </div>
 
-      {/* Interactive Stats Board - Purple Theme */}
+      {/* Interactive Stats Board - Rainbow Palette */}
       <div className={`mt-20 p-8 sm:p-12 rounded-[4rem] border-[6px] border-dashed flex flex-wrap justify-around gap-12 transition-colors ${
         isDark ? 'bg-slate-900/40 border-slate-800' : 'bg-white border-brand-lavender shadow-inner'
       }`}>
         <div className="text-center group cursor-default">
-          <div className="text-5xl sm:text-7xl font-display font-black text-brand-purple mb-2 transition-transform group-hover:scale-110">{finishedCount}</div>
+          <div className="text-5xl sm:text-7xl font-display font-black text-brand-rose mb-2 transition-transform group-hover:scale-110">{finishedCount}</div>
           <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Books Read</div>
         </div>
         <div className="text-center group cursor-default">
-          <div className="text-5xl sm:text-7xl font-display font-black text-brand-violet mb-2 transition-transform group-hover:scale-110">{languageCount}</div>
+          <div className="text-5xl sm:text-7xl font-display font-black text-brand-cyan mb-2 transition-transform group-hover:scale-110">{languageCount}</div>
           <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Worlds Visited</div>
         </div>
         <div className="text-center group cursor-default">
-          <div className="text-5xl sm:text-7xl font-display font-black text-brand-purple mb-2 transition-transform group-hover:scale-110">{finishedCount * 5}</div>
+          <div className="text-5xl sm:text-7xl font-display font-black text-brand-amber mb-2 transition-transform group-hover:scale-110">{finishedCount * 5}</div>
           <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Stars Earned</div>
         </div>
       </div>
