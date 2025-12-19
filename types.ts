@@ -12,6 +12,7 @@ export interface Book {
   tags: string[];
   pages: string[];
   pageImages?: string[];
+  created_by?: string;
 }
 
 export interface ReadingProgressRecord {
@@ -34,7 +35,7 @@ export interface StoryGenerationResult {
 
 export type Category = 'All' | 'Animal Stories' | 'Science' | 'Adventure' | 'Folk Tales' | 'Life Skills';
 export type Level = 'All' | '1' | '2' | '3' | '4' | '5';
-export type LanguageFilter = 'All' | 'English' | 'Malay' | 'Indonesian' | 'Chinese' | 'Thai' | 'Japanese' | 'Korean' | 'Tagalog' | 'Lao' | 'Khmer' | 'Arabic' | 'German' | 'French' | 'Spanish' | 'Dutch' | 'Russian' | 'Italian' | 'Portuguese' | 'Turkish';
-export type AppLanguage = 'en' | 'ms' | 'id' | 'zh' | 'th' | 'ja' | 'ko' | 'tl' | 'lo' | 'km' | 'ar' | 'de' | 'fr' | 'es' | 'nl' | 'ru' | 'it' | 'pt' | 'tr';
+export type LanguageFilter = 'All' | 'English' | 'Malay' | 'Indonesian' | 'Chinese' | 'Thai' | 'Japanese' | 'Korean' | 'Tagalog' | 'Lao' | 'Khmer' | 'Arabic' | 'German' | 'French' | 'Spanish' | 'Dutch' | 'Russian' | 'Italian' | 'Portuguese' | 'Turkish' | 'Vietnamese';
+export type AppLanguage = 'en' | 'ms' | 'id' | 'zh' | 'th' | 'ja' | 'ko' | 'tl' | 'lo' | 'km' | 'ar' | 'de' | 'fr' | 'es' | 'nl' | 'ru' | 'it' | 'pt' | 'tr' | 'vi';
 
-export type ViewType = 'library' | 'creator' | 'favorites' | 'latest' | 'recommendations' | 'progress' | 'achievements';
+export type ViewType = 'library' | 'creator' | 'favorites' | 'latest' | 'recommendations' | 'progress' | 'achievements' | 'my-stories';

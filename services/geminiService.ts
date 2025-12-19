@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { StoryGenerationResult, AppLanguage } from "../types";
 
@@ -21,7 +22,9 @@ const languageNames: Record<AppLanguage, string> = {
   ru: 'Russian',
   it: 'Italian',
   pt: 'Portuguese',
-  tr: 'Turkish'
+  tr: 'Turkish',
+  // Added missing Vietnamese language support
+  vi: 'Vietnamese'
 };
 
 export const generateStory = async (prompt: string, lang: AppLanguage = 'en'): Promise<StoryGenerationResult> => {
@@ -66,7 +69,7 @@ export const generateIllustration = async (visualPrompt: string): Promise<string
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
     contents: {
-      parts: [{ text: `A vibrant, colorful 2D cartoon illustration for children, featuring: ${visualPrompt}. Cute smiling animals, playful scene, bright colors, simple shapes, storybook style, no text in image.` }]
+      parts: [{ text: `A vibrant, colorful 2D cartoon illustration for children, featuring: ${visualPrompt}. Cute smiling animals, playful scene, bright colors, simple shapes, storybook drawing style, no text in image.` }]
     },
     config: {
       imageConfig: {
@@ -85,5 +88,5 @@ export const generateIllustration = async (visualPrompt: string): Promise<string
     }
   }
 
-  return imageUrl || 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook';
+  return imageUrl || 'https://loremflickr.com/600/450/illustration,drawing,cartoon,kids,storybook';
 };

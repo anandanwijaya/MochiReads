@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import * as jose from 'jose';
 
@@ -15,10 +16,6 @@ const setToken = (token: string) => localStorage.setItem(TOKEN_KEY, token);
 const getToken = () => localStorage.getItem(TOKEN_KEY);
 const removeToken = () => localStorage.removeItem(TOKEN_KEY);
 
-/**
- * Validates a JWT token without hitting the database.
- * Returns the payload if valid, or null if expired/invalid.
- */
 export const validateToken = async (token: string) => {
   try {
     const { payload } = await jose.jwtVerify(token, JWT_SECRET);
@@ -28,15 +25,12 @@ export const validateToken = async (token: string) => {
   }
 };
 
-// --- PASSWORD HASHING ---
 async function hashPassword(password: string): Promise<string> {
   const msgUint8 = new TextEncoder().encode(password);
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
-
-// --- MANUAL AUTH FUNCTIONS ---
 
 export const manualSignUp = async (email: string, password: string, fullName: string = '') => {
   try {
@@ -57,7 +51,6 @@ export const manualSignUp = async (email: string, password: string, fullName: st
       throw error;
     }
 
-    // Generate token valid for 7 days
     const token = await new jose.SignJWT({ id: data.id, email: data.email })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
@@ -85,7 +78,6 @@ export const manualSignIn = async (email: string, password: string) => {
     if (error) throw error;
     if (!user) throw new Error('Invalid email or password');
 
-    // Generate token valid for 7 days
     const token = await new jose.SignJWT({ id: user.id, email: user.email })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
@@ -99,10 +91,6 @@ export const manualSignIn = async (email: string, password: string) => {
   }
 };
 
-/**
- * Retrieves the current session by validating the stored token.
- * If the token is expired or invalid, it is removed.
- */
 export const getManualSession = async () => {
   const token = getToken();
   if (!token) return null;
@@ -110,7 +98,6 @@ export const getManualSession = async () => {
   const payload = await validateToken(token);
   
   if (!payload) {
-    console.warn("Session expired or invalid token. Clearing storage.");
     removeToken();
     return null;
   }
@@ -139,14 +126,6 @@ export const signOut = () => {
   return Promise.resolve();
 };
 
-// Placeholder for Google (Removed as requested for strictly manual flow)
-export const signInWithGoogle = () => {
-  return Promise.resolve({ error: { message: 'OAuth disabled. Please use email/password.' } });
-};
-
-export const syncGoogleUser = (user: any) => Promise.resolve(user);
-
-// --- FAVORITES ---
 export const fetchUserFavorites = async (userEmail: string) => {
   const { data, error } = await supabase
     .from('favorites')
@@ -155,6 +134,17 @@ export const fetchUserFavorites = async (userEmail: string) => {
   
   if (error) return [];
   return data.map(f => f.book_id);
+};
+
+export const fetchUserCreatedBooks = async (userEmail: string) => {
+  const { data, error } = await supabase
+    .from('books')
+    .select('*')
+    .eq('created_by', userEmail)
+    .order('created_at', { ascending: false });
+  
+  if (error) return [];
+  return data;
 };
 
 export const toggleFavoriteInDb = async (userEmail: string, bookId: string, isCurrentlyFav: boolean) => {
@@ -173,7 +163,6 @@ export const toggleFavoriteInDb = async (userEmail: string, bookId: string, isCu
   }
 };
 
-// --- PROGRESS ---
 export const fetchReadingProgress = async (userEmail: string) => {
   const { data, error } = await supabase
     .from('reading_progress')
