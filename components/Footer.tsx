@@ -9,9 +9,10 @@ interface FooterProps {
   theme: 'light' | 'dark';
   language: AppLanguage;
   onAdminSeed?: (clearExisting: boolean) => Promise<any>;
+  user?: any;
 }
 
-const Footer: React.FC<FooterProps> = ({ theme, language, onAdminSeed }) => {
+const Footer: React.FC<FooterProps> = ({ theme, language, onAdminSeed, user }) => {
   const [seeding, setSeeding] = useState(false);
   const [seedComplete, setSeedComplete] = useState(false);
   const t = (key: any) => getTranslation(language, key);
@@ -19,8 +20,8 @@ const Footer: React.FC<FooterProps> = ({ theme, language, onAdminSeed }) => {
   const handleSeed = async (clear: boolean) => {
     if (!onAdminSeed) return;
     const msg = clear 
-      ? 'This will CLEAR the library and upload the 10 mock books. Continue?' 
-      : 'This will add the 10 mock books to your library. Continue?';
+      ? 'This will CLEAR the library and upload the mock books. Continue?' 
+      : 'This will add the mock books to your library. Continue?';
     
     if (confirm(msg)) {
       setSeeding(true);
@@ -118,7 +119,7 @@ const Footer: React.FC<FooterProps> = ({ theme, language, onAdminSeed }) => {
         }`}>
           <div className="flex flex-col items-start gap-2">
             <p>© 2024 MochiReads. Powered by Google Gemini AI.</p>
-            {onAdminSeed && (
+            {onAdminSeed && user && (
               <div className="flex gap-4 mt-2">
                 <button 
                   onClick={() => handleSeed(false)}

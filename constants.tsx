@@ -36,7 +36,7 @@ const generateBooks = (): Book[] => {
     ko: ["용감한 꼬마 코끼리", "숲속의 단짝 친구들", "달님의 비밀", "로봇 제빵사"],
     tl: ["Ang Matapang na Elepante", "Mga Kaibigan sa Gubat", "Ang Lihim ng Buwan", "Ang Robot na Panadero"],
     lo: ["ຊ້າງນ້ອຍຜູ້ກ້າຫານ", "ເພື່ອນຮັກໃນປ່າໃຫຍ່", "ຄວາມລັບຂອງດວງຈັນ", "ຫຸ່ນຍົນເຮັດຂะໜົມ"],
-    km: ["ដំរីតូចដ៏ក្លាហาน", "មិត្តសម្លាញ់ក្នុងព្រៃធំ", "អាថ៌កំបាំងនៃព្រះច័ន្ទ", "រ៉ូបូតធ្វើនំ"],
+    km: ["ដំរីតូចដ៏ក្លាហាន", "មិត្តសម្លាញ់ក្នុងព្រៃធំ", "អាថ៌កំបាំងនៃព្រះច័ន្ទ", "រ៉ូបូតធ្វើនំ"],
     ar: ["الفيل الصغير الشجاع", "أصدقاء الغابة العظماء", "سر القمر الغامض", "الروبوت الخباز"],
     de: ["Der mutige kleine Elefant", "Beste Freunde im Wald", "Das Geheimnis des Mondes", "Der Roboter-Bäcker"],
     fr: ["Le petit éléphant courageux", "Meilleurs amis de la forêt", "Le secret de la lune", "Le robot pâtissier"],
@@ -78,14 +78,14 @@ const generateBooks = (): Book[] => {
         title = jaTitles[i-1];
       }
 
-      // Use specific illustration keywords to ensure cartoon style
+      // Consistent high-quality illustration cartoon style
       books.push({
         id,
         title,
         author: i % 2 === 0 ? 'Mochi Librarian' : 'The Magic Lab',
         illustrator: 'Magic Brush AI',
         description: desc,
-        coverImage: `https://loremflickr.com/600/450/cartoon,illustration,kids?lock=${id.length + i}`,
+        coverImage: `https://loremflickr.com/600/450/cartoon,illustration,storybook,kids?lock=${id.length + i}`,
         language: lang.name,
         level: ((i + lang.name.length) % 5) + 1,
         tags: [category, 'Top Pick'],

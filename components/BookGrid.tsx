@@ -21,6 +21,7 @@ interface BookGridProps {
   theme: 'light' | 'dark';
   language: AppLanguage;
   onSeed?: () => Promise<void>;
+  user?: any;
 }
 
 interface CategoryCardMeta {
@@ -38,7 +39,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <PawPrint size={24} />, 
     color: 'text-orange-500', 
     bg: 'bg-orange-50 dark:bg-orange-950/20',
-    image: 'https://loremflickr.com/600/450/cartoon,animal,illustration?lock=10',
+    image: 'https://loremflickr.com/600/450/cartoon,illustration,storybook,kids,animal?lock=101',
     description: 'Meet furry & scaly friends!'
   },
   { 
@@ -46,7 +47,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <Atom size={24} />, 
     color: 'text-blue-500', 
     bg: 'bg-blue-50 dark:bg-blue-950/20',
-    image: 'https://loremflickr.com/600/450/cartoon,space,illustration?lock=20',
+    image: 'https://loremflickr.com/600/450/cartoon,illustration,storybook,kids,science?lock=202',
     description: 'Explore our amazing world.'
   },
   { 
@@ -54,7 +55,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <Compass size={24} />, 
     color: 'text-emerald-500', 
     bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    image: 'https://loremflickr.com/600/450/cartoon,adventure,illustration?lock=30',
+    image: 'https://loremflickr.com/600/450/cartoon,illustration,storybook,kids,adventure?lock=303',
     description: 'Journey to far-off places!'
   },
   { 
@@ -62,7 +63,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <Scroll size={24} />, 
     color: 'text-amber-500', 
     bg: 'bg-amber-50 dark:bg-amber-950/20',
-    image: 'https://loremflickr.com/600/450/cartoon,fairytale,illustration?lock=40',
+    image: 'https://loremflickr.com/600/450/cartoon,illustration,storybook,kids,fairytale?lock=404',
     description: 'Stories from long ago.'
   },
   { 
@@ -70,7 +71,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <Heart size={24} />, 
     color: 'text-rose-500', 
     bg: 'bg-rose-50 dark:bg-rose-950/20',
-    image: 'https://loremflickr.com/600/450/cartoon,children,illustration?lock=50',
+    image: 'https://loremflickr.com/600/450/cartoon,illustration,storybook,kids,friendship?lock=505',
     description: 'Grow, share, and be kind.'
   },
 ];
@@ -161,7 +162,7 @@ const BookGrid: React.FC<BookGridProps> = ({
   selectedLanguageFilter = 'All', 
   setSelectedLanguageFilter = (_lang: LanguageFilter) => {},
   onToggleFavorite, favorites = [],
-  hideFilters = false, theme, language, onSeed
+  hideFilters = false, theme, language, onSeed, user
 }) => {
   const isDark = theme === 'dark';
   const [isSeeding, setIsSeeding] = useState(false);
@@ -326,7 +327,7 @@ const BookGrid: React.FC<BookGridProps> = ({
               >
                 Clear Filters
               </button>
-              {onSeed && (
+              {onSeed && user && (
                 <button
                   onClick={async () => { setIsSeeding(true); playSound('pop'); await onSeed(); setIsSeeding(false); }}
                   disabled={isSeeding}

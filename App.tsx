@@ -85,6 +85,10 @@ const App: React.FC = () => {
   }, []);
 
   const triggerSeed = async () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
     setIsSeedViewOpen(true);
     playSound('pop');
     await seedLibrary((progress) => {
@@ -173,6 +177,14 @@ const App: React.FC = () => {
     setView(v);
   };
 
+  const handleUploadClick = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+    } else {
+      setIsUploadModalOpen(true);
+    }
+  };
+
   const filteredBySearch = useMemo(() => {
     if (!searchQuery) return books;
     const q = searchQuery.toLowerCase();
@@ -209,7 +221,7 @@ const App: React.FC = () => {
     <div className={`min-h-screen transition-colors duration-500 ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-[#fdfbff] text-slate-900'}`}>
       <Navbar 
         onNavigate={handleNavigate}
-        onUploadClick={() => setIsUploadModalOpen(true)}
+        onUploadClick={handleUploadClick}
         onSeedClick={triggerSeed}
         activeView={view}
         user={user}
@@ -304,6 +316,7 @@ const App: React.FC = () => {
                   theme={theme}
                   language={language}
                   onSeed={triggerSeed}
+                  user={user}
                 />
               </div>
             </div>
@@ -328,7 +341,7 @@ const App: React.FC = () => {
                </div>
                <h2 className="text-4xl font-display font-bold">{t('myFavorites')}</h2>
             </div>
-            <BookGrid books={filteredBySearch.filter(b => favorites.includes(b.id))} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} />
+            <BookGrid books={filteredBySearch.filter(b => favorites.includes(b.id))} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} user={user} />
           </div>
         )}
 
@@ -340,7 +353,7 @@ const App: React.FC = () => {
                </div>
                <h2 className="text-4xl font-display font-bold">{t('recent')}</h2>
             </div>
-            <BookGrid books={books.filter(b => latestRead.includes(b.id))} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} />
+            <BookGrid books={books.filter(b => latestRead.includes(b.id))} onRead={handleReadBook} hideFilters theme={theme} language={language} onToggleFavorite={handleToggleFavorite} favorites={favorites} user={user} />
            </div>
         )}
 
@@ -352,7 +365,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <Footer theme={theme} language={language} onAdminSeed={() => triggerSeed()} />
+      <Footer theme={theme} language={language} onAdminSeed={() => triggerSeed()} user={user} />
       <Mascot theme={theme} language={language} />
 
       {activeBook && (
