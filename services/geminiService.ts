@@ -71,7 +71,7 @@ export const generateIllustration = async (visualPrompt: string): Promise<string
     },
     config: {
       imageConfig: {
-        aspectRatio: "3:4"
+        aspectRatio: "4:3"
       }
     }
   });
@@ -86,5 +86,5 @@ export const generateIllustration = async (visualPrompt: string): Promise<string
     }
   }
 
-  return imageUrl || 'https://picsum.photos/400/600';
+  return imageUrl || 'https://picsum.photos/600/450';
 };

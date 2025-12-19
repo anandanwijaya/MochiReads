@@ -47,8 +47,8 @@ const BookCard: React.FC<BookCardProps> = ({ book, onRead, isFavorite, onToggleF
       className="group relative bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden border-4 border-slate-50 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 shadow-xl hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-3 transition-all duration-500 cursor-pointer flex flex-col h-full tactile-button"
       onClick={handleClick}
     >
-      {/* Cover Image - Constant Aspect Ratio */}
-      <div className="aspect-[3/4] relative overflow-hidden bg-slate-100 dark:bg-slate-800 border-b-4 border-slate-50 dark:border-slate-800 shrink-0">
+      {/* Cover Image - Square Little Rectangle Aspect Ratio (4:3) */}
+      <div className="aspect-[4/3] relative overflow-hidden bg-slate-100 dark:bg-slate-800 border-b-4 border-slate-50 dark:border-slate-800 shrink-0">
         <img 
           src={book.coverImage} 
           alt={book.title}
@@ -70,8 +70,8 @@ const BookCard: React.FC<BookCardProps> = ({ book, onRead, isFavorite, onToggleF
 
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-indigo-900/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-           <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-indigo-600 shadow-2xl scale-75 group-hover:scale-100 transition-all duration-500">
-              <Play size={32} fill="currentColor" strokeWidth={0} className="ml-1.5 group-hover:animate-bounce" />
+           <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-indigo-600 shadow-2xl scale-75 group-hover:scale-100 transition-all duration-500">
+              <Play size={28} fill="currentColor" strokeWidth={0} className="ml-1 group-hover:animate-bounce" />
            </div>
         </div>
 

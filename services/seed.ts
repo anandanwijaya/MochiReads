@@ -77,8 +77,8 @@ export const seedLibrary = async (onProgress: (p: SeedProgress) => void) => {
       
       for (let pIdx = 0; pIdx < book.pages.length; pIdx++) {
         const pageFileName = `library/${book.id}/page-${pIdx}-${timestamp}.jpg`;
-        // Using high-quality thematic placeholders for seed data
-        const sourceUrl = `https://picsum.photos/seed/book-${book.id}-page-${pIdx}/800/600`;
+        // Using high-quality thematic illustrative placeholders for seed data
+        const sourceUrl = `https://loremflickr.com/800/600/cartoon,illustration,kids?lock=${book.id.length + pIdx + i + 100}`;
         const pageUpload = await uploadImageFromUrl(sourceUrl, pageFileName, `Page ${pIdx + 1}`);
         pageImageUrls.push(pageUpload.url);
         pageImagePaths.push(pageUpload.path);

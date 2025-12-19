@@ -38,7 +38,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <PawPrint size={24} />, 
     color: 'text-orange-500', 
     bg: 'bg-orange-50 dark:bg-orange-950/20',
-    image: 'https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&q=80&w=400',
+    image: 'https://loremflickr.com/600/450/cartoon,animal,illustration?lock=10',
     description: 'Meet furry & scaly friends!'
   },
   { 
@@ -46,7 +46,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <Atom size={24} />, 
     color: 'text-blue-500', 
     bg: 'bg-blue-50 dark:bg-blue-950/20',
-    image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=400',
+    image: 'https://loremflickr.com/600/450/cartoon,space,illustration?lock=20',
     description: 'Explore our amazing world.'
   },
   { 
@@ -54,7 +54,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <Compass size={24} />, 
     color: 'text-emerald-500', 
     bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    image: 'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?auto=format&fit=crop&q=80&w=400',
+    image: 'https://loremflickr.com/600/450/cartoon,adventure,illustration?lock=30',
     description: 'Journey to far-off places!'
   },
   { 
@@ -62,7 +62,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <Scroll size={24} />, 
     color: 'text-amber-500', 
     bg: 'bg-amber-50 dark:bg-amber-950/20',
-    image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&q=80&w=400',
+    image: 'https://loremflickr.com/600/450/cartoon,fairytale,illustration?lock=40',
     description: 'Stories from long ago.'
   },
   { 
@@ -70,7 +70,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <Heart size={24} />, 
     color: 'text-rose-500', 
     bg: 'bg-rose-50 dark:bg-rose-950/20',
-    image: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&q=80&w=400',
+    image: 'https://loremflickr.com/600/450/cartoon,children,illustration?lock=50',
     description: 'Grow, share, and be kind.'
   },
 ];
@@ -124,7 +124,7 @@ export const BookShelf: React.FC<{
           className="flex gap-6 overflow-x-auto no-scrollbar pb-8 px-2 snap-x snap-mandatory"
         >
           {books.map((book) => (
-            <div key={book.id} className="w-[280px] flex-shrink-0 snap-start">
+            <div key={book.id} className="w-[320px] flex-shrink-0 snap-start">
               <BookCard 
                 book={book} 
                 onRead={onRead} 

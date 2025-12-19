@@ -153,7 +153,7 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 block">Book Cover</label>
                 <div 
                   onClick={() => coverInputRef.current?.click()}
-                  className={`aspect-[3/4] rounded-3xl border-4 border-dashed cursor-pointer relative group overflow-hidden transition-all ${
+                  className={`aspect-[4/3] rounded-3xl border-4 border-dashed cursor-pointer relative group overflow-hidden transition-all ${
                     coverImage ? 'border-transparent' : (isDark ? 'bg-slate-800 border-slate-700 hover:border-orange-500' : 'bg-slate-50 border-slate-200 hover:border-orange-400')
                   }`}
                 >
