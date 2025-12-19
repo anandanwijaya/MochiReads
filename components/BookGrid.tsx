@@ -1,8 +1,7 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { Book, Category, Level, LanguageFilter, AppLanguage } from '../types';
 import BookCard from './BookCard';
-import { Sparkles, Globe, Filter, Loader2, ChevronRight, PawPrint, Atom, Compass, Scroll, Heart, Star, LayoutGrid, ChevronLeft } from 'lucide-react';
+import { Sparkles, Globe, Filter, Loader2, ChevronRight, PawPrint, Atom, Compass, Scroll, Heart, Star, LayoutGrid, ChevronLeft, RotateCcw } from 'lucide-react';
 import { playSound } from './SoundEffects';
 import { getTranslation } from '../i18n';
 
@@ -39,7 +38,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <PawPrint size={24} />, 
     color: 'text-orange-500', 
     bg: 'bg-orange-50 dark:bg-orange-950/20',
-    image: 'https://loremflickr.com/600/450/cartoon,illustration,storybook,kids,animal?lock=101',
+    image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,animal?lock=101',
     description: 'Meet furry & scaly friends!'
   },
   { 
@@ -47,7 +46,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <Atom size={24} />, 
     color: 'text-blue-500', 
     bg: 'bg-blue-50 dark:bg-blue-950/20',
-    image: 'https://loremflickr.com/600/450/cartoon,illustration,storybook,kids,science?lock=202',
+    image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,science?lock=202',
     description: 'Explore our amazing world.'
   },
   { 
@@ -55,7 +54,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <Compass size={24} />, 
     color: 'text-emerald-500', 
     bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    image: 'https://loremflickr.com/600/450/cartoon,illustration,storybook,kids,adventure?lock=303',
+    image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,adventure?lock=303',
     description: 'Journey to far-off places!'
   },
   { 
@@ -63,7 +62,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <Scroll size={24} />, 
     color: 'text-amber-500', 
     bg: 'bg-amber-50 dark:bg-amber-950/20',
-    image: 'https://loremflickr.com/600/450/cartoon,illustration,storybook,kids,fairytale?lock=404',
+    image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,fairytale?lock=404',
     description: 'Stories from long ago.'
   },
   { 
@@ -71,7 +70,7 @@ const CATEGORY_META: CategoryCardMeta[] = [
     icon: <Heart size={24} />, 
     color: 'text-rose-500', 
     bg: 'bg-rose-50 dark:bg-rose-950/20',
-    image: 'https://loremflickr.com/600/450/cartoon,illustration,storybook,kids,friendship?lock=505',
+    image: 'https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook,friendship?lock=505',
     description: 'Grow, share, and be kind.'
   },
 ];
@@ -167,6 +166,15 @@ const BookGrid: React.FC<BookGridProps> = ({
   const isDark = theme === 'dark';
   const [isSeeding, setIsSeeding] = useState(false);
   
+  const hasActiveFilters = selectedCategory !== 'All' || selectedLevel !== 'All' || selectedLanguageFilter !== 'All';
+
+  const resetAllFilters = () => {
+    playSound('woosh');
+    setSelectedCategory('All');
+    setSelectedLevel('All');
+    setSelectedLanguageFilter('All');
+  };
+
   const filteredBooks = hideFilters 
     ? books 
     : books.filter(book => {
@@ -195,23 +203,25 @@ const BookGrid: React.FC<BookGridProps> = ({
   return (
     <section className="pb-24">
       {!hideFilters && (
-        <div className="space-y-16 mb-20 animate-in fade-in slide-in-from-bottom-6 duration-700">
-          <div className="space-y-8">
-            <div className="flex items-center justify-between">
+        <div className="space-y-12 mb-20 animate-in fade-in slide-in-from-bottom-6 duration-700">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-indigo-500 rounded-2xl text-white shadow-lg rotate-3">
                   <Star size={24} fill="currentColor" strokeWidth={0} />
                 </div>
                 <h3 className={`text-3xl font-display font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                  Explore by Topic
+                  Explore Topics
                 </h3>
               </div>
-              {selectedCategory !== 'All' && (
+              
+              {hasActiveFilters && (
                 <button 
-                  onClick={() => { playSound('woosh'); setSelectedCategory('All'); }}
-                  className="text-sm font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform"
+                  onClick={resetAllFilters}
+                  className="text-sm font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 px-4 py-2 rounded-xl transition-all"
                 >
-                  Clear Category <ChevronRight size={18} />
+                  <RotateCcw size={16} />
+                  Reset All Filters
                 </button>
               )}
             </div>
@@ -243,35 +253,44 @@ const BookGrid: React.FC<BookGridProps> = ({
             </div>
           </div>
 
-          <div className={`flex flex-col lg:flex-row lg:items-center gap-8 p-8 rounded-[3rem] border-4 transition-colors ${
+          <div className={`flex flex-col lg:flex-row lg:items-center gap-8 p-6 lg:p-8 rounded-[3rem] border-4 transition-colors ${
             isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-magic-sky/40 border-white shadow-inner'
           }`}>
-            <div className="flex items-center gap-4 flex-1">
-              <div className="flex items-center gap-2.5 text-slate-500 font-black text-xs uppercase tracking-[0.2em] shrink-0">
+            {/* Language Section */}
+            <div className="flex items-center gap-4 flex-1 min-w-0 relative">
+              <div className="flex items-center gap-2.5 text-slate-500 font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] shrink-0">
                 <Globe size={18} className="text-indigo-400" />
                 <span>Language</span>
               </div>
-              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-1 flex-1">
-                {availableLanguages.map((lang) => (
-                  <button
-                    key={lang}
-                    onClick={() => { handleFilterClick(); setSelectedLanguageFilter(lang as LanguageFilter); }}
-                    className={`px-5 py-2.5 rounded-2xl text-[11px] font-black transition-all whitespace-nowrap border-2 tactile-button ${
-                      selectedLanguageFilter === lang 
-                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-indigo-200' 
-                        : (isDark ? 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700' : 'bg-white border-slate-100 text-slate-500 hover:border-indigo-100')
-                    }`}
-                  >
-                    {lang}
-                  </button>
-                ))}
+              
+              <div className="relative flex-1 min-w-0 overflow-hidden">
+                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-1 snap-x snap-mandatory">
+                  {availableLanguages.map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => { handleFilterClick(); setSelectedLanguageFilter(lang as LanguageFilter); }}
+                      className={`px-5 py-2.5 rounded-2xl text-[11px] font-black transition-all whitespace-nowrap border-2 tactile-button snap-start ${
+                        selectedLanguageFilter === lang 
+                          ? 'bg-indigo-600 border-indigo-600 text-white shadow-indigo-200' 
+                          : (isDark ? 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700' : 'bg-white border-slate-100 text-slate-500 hover:border-indigo-100')
+                      }`}
+                    >
+                      {lang}
+                    </button>
+                  ))}
+                </div>
+                {/* Visual fading masks for scroll indicators */}
+                <div className={`absolute top-0 bottom-0 left-0 w-8 pointer-events-none transition-opacity duration-300 bg-gradient-to-r from-magic-sky/60 dark:from-slate-900/60 to-transparent`} />
+                <div className={`absolute top-0 bottom-0 right-0 w-8 pointer-events-none transition-opacity duration-300 bg-gradient-to-l from-magic-sky/60 dark:from-slate-900/60 to-transparent`} />
               </div>
             </div>
 
-            <div className="h-10 w-[2px] bg-slate-200 dark:bg-slate-800 hidden lg:block rounded-full" />
+            {/* Separator - Only visible on desktop row layout */}
+            <div className="h-10 w-[2px] bg-slate-200 dark:bg-slate-800 hidden lg:block rounded-full shrink-0" />
 
-            <div className="flex items-center gap-5">
-              <div className="flex items-center gap-2.5 text-slate-500 font-black text-xs uppercase tracking-[0.2em] shrink-0">
+            {/* Level Section */}
+            <div className="flex items-center gap-5 shrink-0">
+              <div className="flex items-center gap-2.5 text-slate-500 font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] shrink-0">
                 <Filter size={18} className="text-amber-400" />
                 <span>Level</span>
               </div>
@@ -297,7 +316,7 @@ const BookGrid: React.FC<BookGridProps> = ({
 
       <div className="mb-8">
         <h4 className={`text-xl font-display font-bold mb-6 px-2 ${isDark ? 'text-white' : 'text-slate-700'}`}>
-          {selectedCategory === 'All' && selectedLanguageFilter === 'All' && selectedLevel === 'All' 
+          {!hasActiveFilters 
             ? 'All Stories' 
             : `Search Results (${filteredBooks.length})`}
         </h4>
@@ -322,10 +341,10 @@ const BookGrid: React.FC<BookGridProps> = ({
             
             <div className="flex flex-col sm:flex-row justify-center gap-6">
               <button
-                onClick={() => { playSound('pop'); setSelectedCategory('All'); setSelectedLevel('All'); setSelectedLanguageFilter('All'); }}
+                onClick={resetAllFilters}
                 className="px-10 py-5 bg-white dark:bg-slate-800 border-4 border-indigo-100 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 rounded-[2.5rem] font-black text-xl hover:bg-indigo-50 transition-all tactile-button"
               >
-                Clear Filters
+                Clear All Filters
               </button>
               {onSeed && user && (
                 <button

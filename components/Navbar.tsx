@@ -1,5 +1,5 @@
 
-import { BarChart2, Book as BookIcon, BookOpen, Clock, Heart, LogOut, Moon, Search, Sparkles, Sun, Upload, User, X, Globe, Check, Database } from 'lucide-react';
+import { BarChart2, BookOpen, Globe, Heart, LogOut, Search, Sparkles, Upload, User, X, Check, Database } from 'lucide-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getTranslation, translations } from '../i18n';
 import { signOut } from '../services/supabase';
@@ -34,6 +34,7 @@ const Navbar: React.FC<NavbarProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
+  const isDark = theme === 'dark';
   const t = (key: any) => getTranslation(language, key);
 
   const handleNav = (view: ViewType) => {
@@ -77,29 +78,30 @@ const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   return (
-    <nav className={`sticky top-0 z-[100] px-4 py-3 transition-colors duration-300 border-b-2 ${
-      theme === 'dark' ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-slate-100 shadow-sm'
-    } backdrop-blur-md`}>
-      <div className="w-full flex items-center justify-between gap-4 px-2 sm:px-6">
-        {/* Logo Section */}
+    <nav className={`sticky top-0 z-50 px-6 sm:px-10 py-6 sm:py-8 transition-all duration-500 border-b-[6px] ${
+      isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white/90 border-blue-50/50 shadow-xl'
+    } backdrop-blur-2xl`}>
+      <div className="max-w-[1920px] mx-auto flex items-center justify-between gap-6 sm:gap-12">
+        
+        {/* Playful Brand Logo */}
         <div 
-          className="flex items-center gap-2 cursor-pointer group flex-shrink-0"
+          className="flex items-center gap-4 cursor-pointer group flex-shrink-0"
           onClick={() => handleNav('library')}
         >
-          <div className="bg-indigo-600 p-2 rounded-xl text-white group-hover:rotate-6 transition-all shadow-md">
-            <BookOpen size={24} strokeWidth={3} />
+          <div className="bg-brand-blue p-3 sm:p-4 rounded-[1.5rem] sm:rounded-[2rem] text-white group-hover:rotate-12 transition-all shadow-xl shadow-brand-blue/30 border-2 border-blue-400">
+            <BookOpen size={32} className="sm:w-10 sm:h-10" strokeWidth={3} />
           </div>
-          <h1 className={`text-xl font-display font-bold tracking-tight hidden sm:block ${
-            theme === 'dark' ? 'text-white' : 'text-slate-800'
+          <h1 className={`text-3xl sm:text-4xl font-display font-black tracking-tighter hidden lg:block ${
+            isDark ? 'text-white' : 'text-slate-900'
           }`}>
-            Mochi<span className="text-indigo-600">Reads</span>
+            Mochi<span className="text-brand-blue">Reads</span>
           </h1>
         </div>
 
-        {/* Search Bar - Center */}
-        <div className="flex-1 max-w-4xl relative group" ref={searchRef}>
-          <div className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors z-10 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>
-            <Search size={18} />
+        {/* Sticker-style Search Bar */}
+        <div className="flex-1 max-w-2xl relative group min-w-0" ref={searchRef}>
+          <div className={`absolute left-6 top-1/2 -translate-y-1/2 transition-colors z-10 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+            <Search size={26} strokeWidth={3} />
           </div>
           <input 
             type="text"
@@ -110,28 +112,28 @@ const Navbar: React.FC<NavbarProps> = ({
               setShowSuggestions(true);
             }}
             placeholder={t('library') + '...'}
-            className={`w-full pl-12 pr-10 py-2.5 rounded-2xl outline-none border-2 transition-all font-medium text-sm z-0 ${
-              theme === 'dark' 
-                ? 'bg-slate-800 border-slate-700 text-white focus:border-indigo-500 focus:bg-slate-900' 
-                : 'bg-slate-50 border-slate-100 text-slate-700 focus:border-indigo-200 focus:bg-white'
+            className={`w-full pl-16 pr-14 py-4 sm:py-5 rounded-[2rem] sm:rounded-[2.5rem] outline-none border-[6px] transition-all font-black text-lg sm:text-xl ${
+              isDark 
+                ? 'bg-slate-800 border-slate-700 text-white focus:border-brand-purple focus:bg-slate-950' 
+                : 'bg-blue-50/50 border-blue-50 text-slate-800 focus:border-brand-blue focus:bg-white shadow-inner'
             }`}
           />
           {searchQuery && (
             <button 
               onClick={() => { setSearchQuery(''); setShowSuggestions(false); }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors z-10"
+              className="absolute right-6 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors z-10"
             >
-              <X size={14} />
+              <X size={22} strokeWidth={3} />
             </button>
           )}
 
-          {/* Search Suggestions Dropdown */}
+          {/* Magical Search Suggestions */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className={`absolute top-full left-0 right-0 mt-2 rounded-2xl shadow-2xl border-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-[110] ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-50'
+            <div className={`absolute top-full left-0 right-0 mt-6 rounded-[3rem] shadow-3xl border-[6px] overflow-hidden animate-in fade-in slide-in-from-top-6 duration-300 z-[110] ${
+              isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-blue-50'
             }`}>
-              <div className="p-2">
-                <p className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Suggestions</p>
+              <div className="p-6">
+                <p className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Magical Findings</p>
                 {suggestions.map((book) => (
                   <button
                     key={book.id}
@@ -141,18 +143,18 @@ const Navbar: React.FC<NavbarProps> = ({
                       setShowSuggestions(false);
                       onReadBook(book);
                     }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
-                      theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-indigo-50/50'
+                    className={`w-full flex items-center gap-8 px-8 py-5 rounded-[2rem] text-left transition-all ${
+                      isDark ? 'hover:bg-slate-800' : 'hover:bg-brand-blue/5'
                     }`}
                   >
-                    <div className="w-10 h-12 flex-shrink-0 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
+                    <div className="w-16 h-20 flex-shrink-0 rounded-2xl overflow-hidden border-[4px] border-slate-100 dark:border-slate-700 shadow-lg">
                       <img src={book.coverImage} className="w-full h-full object-cover" alt={book.title} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-bold truncate ${theme === 'dark' ? 'text-slate-100' : 'text-slate-800'}`}>{book.title}</p>
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">{book.author}</p>
+                      <p className={`text-xl font-black truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{book.title}</p>
+                      <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">By {book.author}</p>
                     </div>
-                    <BookIcon size={14} className="text-slate-300" />
+                    <Sparkles size={24} className="text-brand-purple animate-pulse" />
                   </button>
                 ))}
               </div>
@@ -160,136 +162,113 @@ const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Language Selector */}
-          <div className="relative" ref={langRef}>
+        {/* Fun Navigation Buttons */}
+        <div className="flex items-center gap-4 sm:gap-8 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4">
             <button 
-              onClick={() => { playSound('pop'); setShowLangMenu(!showLangMenu); }}
-              className={`p-2 rounded-xl border-2 transition-all flex items-center gap-1.5 ${
-                theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700' : 'bg-slate-50 border-slate-100 text-slate-600 hover:bg-slate-100'
+              onClick={() => handleNav('favorites')}
+              className={`p-4 sm:p-5 rounded-[1.5rem] sm:rounded-[2rem] transition-all relative group border-4 ${
+                activeView === 'favorites' 
+                  ? 'text-rose-600 bg-rose-50 border-rose-100 dark:bg-rose-950/20 dark:border-rose-900'
+                  : 'text-slate-400 border-transparent hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10'
               }`}
             >
-              <Globe size={18} />
-              <span className="hidden lg:inline text-xs font-black uppercase tracking-widest">{language}</span>
+              <Heart size={30} strokeWidth={3} className="group-hover:scale-125 transition-transform" />
+              {favoritesCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-8 h-8 bg-rose-500 text-white text-xs font-black flex items-center justify-center rounded-full border-[4px] border-white dark:border-slate-900">
+                  {favoritesCount}
+                </span>
+              )}
             </button>
-            {showLangMenu && (
-              <div className={`absolute top-full right-0 mt-3 w-64 max-h-80 overflow-y-auto rounded-2xl shadow-2xl border-2 p-2 animate-in slide-in-from-top-2 duration-200 z-[120] ${
-                theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-50'
-              }`}>
-                <div className="p-1 space-y-1">
-                  {sortedLanguages.map((langCode) => (
-                    <button
-                      key={langCode}
-                      onClick={() => handleLangSelect(langCode)}
-                      className={`w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl text-left transition-colors text-sm font-bold ${
-                        language === langCode 
-                          ? 'bg-indigo-600 text-white' 
-                          : (theme === 'dark' ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-50')
-                      }`}
-                    >
-                      <span>{translations[langCode].languageName}</span>
-                      {language === langCode && <Check size={16} />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
 
-          <div className="hidden lg:flex items-center gap-1">
-            {[
-              { id: 'latest', icon: <Clock size={18} />, label: t('recent') },
-              { id: 'favorites', icon: <Heart size={18} />, label: t('favorites'), badge: favoritesCount > 0 },
-            ].map((item) => (
+            <div className="relative" ref={langRef}>
               <button 
-                key={item.id}
-                onClick={() => handleNav(item.id as ViewType)}
-                className={`p-2 rounded-xl transition-all relative ${
-                  activeView === item.id 
-                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                onClick={() => { playSound('pop'); setShowLangMenu(!showLangMenu); }}
+                className={`p-4 sm:p-5 rounded-[1.5rem] sm:rounded-[2rem] border-[6px] transition-all flex items-center gap-4 ${
+                  isDark ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700' : 'bg-blue-50/50 border-blue-50 text-brand-blue hover:bg-blue-100 shadow-sm'
                 }`}
-                title={item.label}
               >
-                {item.icon}
-                {item.badge && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-indigo-500 rounded-full"></span>
-                )}
+                <Globe size={30} strokeWidth={3} />
+                <span className="hidden xl:inline text-sm font-black uppercase tracking-widest">{language}</span>
               </button>
-            ))}
+              {showLangMenu && (
+                <div className={`absolute top-full right-0 mt-6 w-80 max-h-[75vh] overflow-y-auto rounded-[3rem] shadow-3xl border-[6px] p-6 animate-in slide-in-from-top-6 duration-300 z-[120] ${
+                  isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-blue-50'
+                }`}>
+                  <div className="p-2 space-y-3">
+                    {sortedLanguages.map((langCode) => (
+                      <button
+                        key={langCode}
+                        onClick={() => handleLangSelect(langCode)}
+                        className={`w-full flex items-center justify-between gap-5 px-6 py-5 rounded-[1.5rem] text-left transition-all text-base font-black ${
+                          language === langCode 
+                            ? 'bg-brand-blue text-white shadow-2xl' 
+                            : (isDark ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-700 hover:bg-blue-50')
+                        }`}
+                      >
+                        <span>{translations[langCode].languageName}</span>
+                        {language === langCode && <Check size={24} strokeWidth={4} />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <button 
             onClick={() => handleNav('creator')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all active:scale-95 group ${
+            className={`hidden sm:flex items-center gap-4 px-8 py-5 rounded-[2rem] sm:rounded-[2.5rem] font-black transition-all active:scale-90 group border-[6px] ${
               activeView === 'creator' 
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-none' 
-                : (theme === 'dark' ? 'bg-slate-800 text-slate-300 border border-slate-700' : 'bg-slate-50 text-slate-600 border border-slate-100 hover:bg-slate-100')
+                ? 'bg-brand-purple border-purple-400 text-white shadow-2xl shadow-brand-purple/40' 
+                : (isDark ? 'bg-slate-800 text-brand-purple border-slate-700' : 'bg-magic-purple border-purple-100 text-brand-purple hover:scale-105 shadow-md shadow-brand-purple/5')
             }`}
           >
-            <Sparkles size={18} />
-            <span className="hidden sm:inline">Magic Lab</span>
+            <Sparkles size={28} className="group-hover:animate-sparkle" />
+            <span className="hidden md:inline uppercase tracking-[0.2em] text-base">Story Lab</span>
           </button>
-
-          <div className="h-8 w-[1px] bg-slate-200 dark:bg-slate-800 mx-1" />
 
           {user ? (
             <div className="relative">
               <button 
                 onClick={() => { playSound('pop'); setShowProfileMenu(!showProfileMenu); }}
-                className={`w-9 h-9 rounded-full flex items-center justify-center font-black border-2 transition-all hover:scale-105 ${
-                  theme === 'dark' ? 'bg-slate-800 border-slate-700 text-indigo-400' : 'bg-indigo-50 border-indigo-100 text-indigo-600'
+                className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center font-black border-[6px] transition-all hover:scale-110 active:scale-90 shadow-2xl ${
+                  isDark ? 'bg-slate-800 border-slate-700 text-brand-blue' : 'bg-white border-blue-50 text-brand-blue'
                 }`}
               >
                 {user.email?.[0].toUpperCase()}
               </button>
 
               {showProfileMenu && (
-                <div className={`absolute top-full right-0 mt-3 w-56 rounded-2xl shadow-xl border-2 p-2 animate-in slide-in-from-top-2 duration-200 z-[100] ${
-                  theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-50'
+                <div className={`absolute top-full right-0 mt-6 w-80 rounded-[3rem] shadow-3xl border-[6px] p-6 animate-in slide-in-from-top-6 duration-300 z-[100] ${
+                  isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-blue-50'
                 }`}>
-                  <div className={`px-4 py-2 border-b mb-1 ${theme === 'dark' ? 'border-slate-700' : 'border-slate-50'}`}>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Signed in as</p>
-                    <p className={`text-xs font-bold truncate ${theme === 'dark' ? 'text-slate-200' : 'text-slate-700'}`}>{user.email}</p>
+                  <div className={`px-6 py-5 border-b-[4px] mb-4 ${isDark ? 'border-slate-700' : 'border-slate-100'}`}>
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-[0.25em] mb-2">Signed in</p>
+                    <p className={`text-base font-black truncate ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>{user.email}</p>
                   </div>
 
-                  <button 
-                    onClick={() => handleNav('progress')}
-                    className={`w-full flex items-center gap-2 px-4 py-2 rounded-xl transition-colors font-bold text-sm ${
-                      activeView === 'progress' 
-                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' 
-                        : (theme === 'dark' ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-600 hover:bg-slate-50')
-                    }`}
-                  >
-                    <BarChart2 size={16} />
-                    My Progress
-                  </button>
-
-                  <button 
-                    onClick={() => { onUploadClick(); setShowProfileMenu(false); }}
-                    className={`w-full flex items-center gap-2 px-4 py-2 rounded-xl transition-colors font-bold text-sm ${theme === 'dark' ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-600 hover:bg-slate-50'}`}
-                  >
-                    <Upload size={16} />
-                    Upload Book
-                  </button>
-
-                  <button 
-                    onClick={() => { onSeedClick(); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-colors font-bold text-sm"
-                  >
-                    <Database size={16} />
-                    Seed Library (76)
-                  </button>
+                  {[
+                    { label: 'My Progress', icon: <BarChart2 size={24} />, view: 'progress' },
+                    { label: 'Upload Story', icon: <Upload size={24} />, action: () => onUploadClick() },
+                    { label: 'Magic Settings', icon: <Database size={24} />, action: () => onSeedClick() }
+                  ].map((item, idx) => (
+                    <button 
+                      key={idx}
+                      onClick={() => { if(item.view) handleNav(item.view as ViewType); if(item.action) { item.action(); setShowProfileMenu(false); } }}
+                      className="w-full flex items-center gap-5 px-6 py-5 rounded-[1.5rem] hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors font-black text-base text-slate-600 dark:text-slate-300"
+                    >
+                      {item.icon} {item.label}
+                    </button>
+                  ))}
                   
-                  <div className={`h-[1px] my-1 ${theme === 'dark' ? 'bg-slate-700' : 'bg-slate-100'}`} />
+                  <div className={`h-1.5 my-4 rounded-full ${isDark ? 'bg-slate-700' : 'bg-slate-100'}`} />
 
                   <button 
                     onClick={async () => { playSound('pop'); await signOut(); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors font-bold text-sm"
+                    className="w-full flex items-center gap-5 px-6 py-5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-[1.5rem] transition-colors font-black text-base"
                   >
-                    <LogOut size={16} />
-                    {t('signOut')}
+                    <LogOut size={24} /> {t('signOut')}
                   </button>
                 </div>
               )}
@@ -297,30 +276,13 @@ const Navbar: React.FC<NavbarProps> = ({
           ) : (
             <button 
               onClick={onLoginClick}
-              className={`p-2 rounded-xl transition-all ${
-                theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-indigo-600'
+              className={`p-4 sm:p-5 rounded-[1.5rem] sm:rounded-[2rem] transition-all border-[6px] tactile-button ${
+                isDark ? 'text-slate-400 border-slate-800 bg-slate-800' : 'text-slate-500 border-blue-50 bg-white'
               }`}
             >
-              <User size={22} />
+              <User size={30} strokeWidth={3} />
             </button>
           )}
-
-          {/* Theme Toggle Button */}
-          <button 
-            onClick={() => { playSound('pop'); toggleTheme(); }}
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            className={`p-2 rounded-xl transition-all border-2 flex items-center justify-center ${
-              theme === 'dark' 
-                ? 'bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700 hover:border-amber-400/30 hover:shadow-[0_0_15px_rgba(251,191,36,0.1)]' 
-                : 'bg-indigo-50 border-indigo-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-white'
-            }`}
-          >
-            {theme === 'dark' ? (
-              <Sun size={20} className="animate-in spin-in-180 duration-500" />
-            ) : (
-              <Moon size={20} className="animate-in spin-in-180 duration-500" />
-            )}
-          </button>
         </div>
       </div>
     </nav>

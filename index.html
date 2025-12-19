@@ -18,25 +18,17 @@
             },
             colors: {
               magic: {
+                blue: '#e0f2fe',
+                purple: '#f3e8ff',
                 mint: '#d1fae5',
                 coral: '#fee2e2',
                 lemon: '#fef3c7',
-                sky: '#e0f2fe',
-                purple: '#f3e8ff'
               },
-              purple: {
-                50: '#f5f3ff',
-                100: '#ede9fe',
-                200: '#ddd6fe',
-                300: '#c4b5fd',
-                400: '#a78bfa',
-                500: '#8b5cf6',
-                600: '#7c3aed',
-                700: '#6d28d9',
-                800: '#5b21b6',
-                900: '#4c1d95',
-                950: '#2e1065',
-              },
+              brand: {
+                blue: '#2563eb', // Indigo 600
+                purple: '#9333ea', // Purple 600
+                sky: '#0ea5e9' // Sky 500
+              }
             },
             animation: {
               'bounce-slow': 'bounce 3s infinite',
@@ -44,7 +36,7 @@
               'pulse-soft': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
               'squish': 'squish 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
               'sparkle': 'sparkle 0.6s ease-out forwards',
-              'shake': 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both',
+              'morph': 'morph 8s ease-in-out infinite',
             },
             keyframes: {
               floating: {
@@ -61,11 +53,9 @@
                 '50%': { opacity: 1, transform: 'scale(1.2) rotate(180deg)' },
                 '100%': { opacity: 0, transform: 'scale(1) rotate(360deg)' },
               },
-              shake: {
-                '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
-                '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
-                '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
-                '40%, 60%': { transform: 'translate3d(4px, 0, 0)' },
+              morph: {
+                '0%, 100%': { 'border-radius': '60% 40% 30% 70% / 60% 30% 70% 40%' },
+                '50%': { 'border-radius': '30% 60% 70% 40% / 50% 60% 30% 60%' },
               }
             }
           }
@@ -78,63 +68,76 @@
     <style>
       body {
         font-family: 'Quicksand', sans-serif;
-        transition: background-color 0.3s ease, color 0.3s ease;
+        transition: background-color 0.5s ease, color 0.5s ease;
       }
       .dark body {
-        background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
         background-color: #020617;
+        background-image: 
+          radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+          radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+          radial-gradient(at 100% 0%, hsla(260,31%,25%,0.2) 0, transparent 50%);
       }
       body:not(.dark) {
-        background-image: radial-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px);
-        background-color: #fdfbff;
+        background-color: #f8fafc;
+        background-image: 
+          radial-gradient(at 0% 0%, hsla(210,100%,96%,1) 0, transparent 50%), 
+          radial-gradient(at 50% 0%, hsla(255,100%,96%,1) 0, transparent 50%), 
+          radial-gradient(at 100% 0%, hsla(210,100%,96%,1) 0, transparent 50%);
       }
-      body { background-size: 40px 40px; }
       
       .tactile-button {
-        box-shadow: 0 6px 0 0 rgba(0,0,0,0.1);
+        box-shadow: 0 8px 0 0 rgba(0,0,0,0.1);
         transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
       .tactile-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 0 0 rgba(0,0,0,0.08);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 0 0 rgba(0,0,0,0.08);
       }
       .tactile-button:active {
-        transform: translateY(4px) scale(0.98);
+        transform: translateY(6px) scale(0.96);
         box-shadow: 0 2px 0 0 rgba(0,0,0,0.1);
       }
-      
-      .sparkle-container { position: relative; }
-      .sparkle-container::after {
-        content: '✨';
-        position: absolute;
-        top: -10px;
-        right: -10px;
-        font-size: 20px;
-        opacity: 0;
-        pointer-events: none;
+
+      .sticker-border {
+        border-width: 8px;
+        border-style: solid;
       }
-      .sparkle-container:hover::after {
-        animation: sparkle 0.8s ease-out forwards;
+
+      .puffy-shadow {
+        box-shadow: 0 20px 40px -15px rgba(37, 99, 235, 0.15);
       }
 
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+      .magic-text {
+        background: linear-gradient(to right, #2563eb, #9333ea, #0ea5e9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-size: 200% auto;
+        animation: gradient-flow 4s linear infinite;
+      }
+
+      @keyframes gradient-flow {
+        0% { background-position: 0% center; }
+        100% { background-position: 200% center; }
+      }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom": "https://esm.sh/react-dom@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.48.1",
-    "jose": "https://esm.sh/jose@5.2.3"
-  }
-}
-</script>
-</head>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom": "https://esm.sh/react-dom@^19.2.3",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+        "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+        "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.48.1",
+        "jose": "https://esm.sh/jose@5.2.3"
+      }
+    }
+    </script>
+  </head>
   <body class="text-slate-900 dark:text-slate-100 overflow-x-hidden">
     <div id="root"></div>
     <script type="module" src="index.tsx"></script>

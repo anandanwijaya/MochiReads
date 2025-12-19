@@ -1,4 +1,3 @@
-
 import { Book } from './types';
 
 /**
@@ -78,14 +77,14 @@ const generateBooks = (): Book[] => {
         title = jaTitles[i-1];
       }
 
-      // Consistent high-quality illustration cartoon style
+      // Consistent high-quality, friendly 2D cartoon illustration style
       books.push({
         id,
         title,
         author: i % 2 === 0 ? 'Mochi Librarian' : 'The Magic Lab',
         illustrator: 'Magic Brush AI',
         description: desc,
-        coverImage: `https://loremflickr.com/600/450/cartoon,illustration,storybook,kids?lock=${id.length + i}`,
+        coverImage: `https://loremflickr.com/600/450/colorful,2D,cartoon,children,cute,smiling,animals,playful,bright,simple,storybook?lock=${id.length + i}`,
         language: lang.name,
         level: ((i + lang.name.length) % 5) + 1,
         tags: [category, 'Top Pick'],
