@@ -1,9 +1,9 @@
 
 import React, { useState, useRef } from 'react';
-import { X, Upload, Plus, Trash2, BookOpen, Loader2, Image as ImageIcon, Type, Globe, Star, ChevronLeft, ChevronRight, Settings2, Layout, CheckCircle } from 'lucide-react';
+import { X, Upload, Plus, Trash2, BookOpen, Loader2, Image as ImageIcon, Type, Globe, Star, ChevronLeft, ChevronRight, Settings2, Layout, CheckCircle, PawPrint, Atom, Compass, Scroll, Heart } from 'lucide-react';
 import { supabase, uploadImageFromBase64 } from '../services/supabase';
 import { playSound } from './SoundEffects';
-import { AppLanguage } from '../types';
+import { AppLanguage, Category } from '../types';
 
 interface BookUploadModalProps {
   isOpen: boolean;
@@ -12,6 +12,14 @@ interface BookUploadModalProps {
   theme: 'light' | 'dark';
   language: AppLanguage;
 }
+
+const CATEGORIES: { id: Exclude<Category, 'All'>; icon: React.ReactNode; color: string }[] = [
+  { id: 'Animal Stories', icon: <PawPrint size={18} />, color: 'bg-brand-rose' },
+  { id: 'Science', icon: <Atom size={18} />, color: 'bg-brand-cyan' },
+  { id: 'Adventure', icon: <Compass size={18} />, color: 'bg-brand-amber' },
+  { id: 'Folk Tales', icon: <Scroll size={18} />, color: 'bg-brand-purple' },
+  { id: 'Life Skills', icon: <Heart size={18} />, color: 'bg-brand-pink' },
+];
 
 const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUploadSuccess, theme, language }) => {
   const [step, setStep] = useState<'info' | 'pages'>('info');
@@ -25,6 +33,7 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
   const [description, setDescription] = useState('');
   const [bookLanguage, setBookLanguage] = useState('English');
   const [level, setLevel] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState<Exclude<Category, 'All'>>('Adventure');
   const [tags, setTags] = useState('');
   const [coverImage, setCoverImage] = useState<string | null>(null);
 
@@ -107,6 +116,8 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
         })
       );
 
+      const finalTags = [selectedCategory, ...tags.split(',').map(t => t.trim()).filter(t => t && t !== selectedCategory)];
+
       const { error: dbError } = await supabase
         .from('books')
         .insert([{
@@ -118,7 +129,7 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
           cover_image_path: coverRes.path,
           language: bookLanguage,
           level,
-          tags: tags.split(',').map(t => t.trim()).filter(t => t),
+          tags: finalTags,
           pages: pages.map(p => p.text),
           page_images: pageImageUrls,
           is_public: true
@@ -140,7 +151,6 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
       <div className={`w-full max-w-5xl h-[95vh] sm:h-[85vh] rounded-[3.5rem] shadow-2xl overflow-hidden border-8 flex flex-col animate-in zoom-in-95 duration-200 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-white'}`}>
         
-        {/* Header - Fixed */}
         <div className={`p-6 sm:p-8 flex items-center justify-between border-b-4 shrink-0 ${isDark ? 'border-slate-800' : 'border-slate-50'}`}>
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-brand-blue rounded-2xl flex items-center justify-center text-white shadow-lg rotate-3 shrink-0">
@@ -155,7 +165,6 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
           </div>
 
           <div className="flex items-center gap-4">
-             {/* Progress Stepper */}
              <div className="hidden sm:flex items-center gap-2 bg-slate-50 dark:bg-slate-800 p-1.5 rounded-2xl border-2 dark:border-slate-700">
                <button 
                  onClick={() => { playSound('pop'); setStep('info'); }}
@@ -176,12 +185,10 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
           </div>
         </div>
 
-        {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 no-scrollbar">
           {step === 'info' ? (
             <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-left-4 duration-200">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Cover Upload */}
                 <div className="lg:col-span-4">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block">Book Cover</label>
                   <div 
@@ -202,7 +209,6 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
                   </div>
                 </div>
 
-                {/* Metadata Fields */}
                 <div className="lg:col-span-8 space-y-6">
                   <div>
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block">Story Title</label>
@@ -216,6 +222,27 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
                     />
                   </div>
                   
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 block">Select Category</label>
+                    <div className="flex flex-wrap gap-3">
+                      {CATEGORIES.map((cat) => (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => { playSound('pop'); setSelectedCategory(cat.id); }}
+                          className={`flex items-center gap-3 px-5 py-3 rounded-2xl border-4 transition-all font-bold text-sm tactile-button ${
+                            selectedCategory === cat.id 
+                              ? `${isDark ? 'bg-brand-purple border-purple-400' : 'bg-brand-blue border-blue-200'} text-white shadow-lg scale-105` 
+                              : (isDark ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-white border-slate-100 text-slate-500')
+                          }`}
+                        >
+                          {cat.icon}
+                          {cat.id}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block">Author Name</label>
@@ -239,23 +266,38 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
                         <option>Indonesian</option>
                         <option>Thai</option>
                         <option>Chinese</option>
+                        <option>Japanese</option>
+                        <option>Korean</option>
+                        <option>Vietnamese</option>
                       </select>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block">Reading Level</label>
-                    <div className="flex flex-wrap gap-2">
-                      {[1, 2, 3, 4, 5].map(l => (
-                        <button 
-                          key={l}
-                          type="button"
-                          onClick={() => { playSound('pop'); setLevel(l); }}
-                          className={`w-12 h-12 rounded-xl font-black transition-all border-4 tactile-button ${level === l ? 'bg-brand-blue border-blue-400 text-white shadow-lg' : (isDark ? 'bg-slate-800 border-slate-800 text-slate-500 hover:border-slate-700' : 'bg-white border-slate-50 text-slate-400 hover:border-blue-50')}`}
-                        >
-                          {l}
-                        </button>
-                      ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block">Reading Level</label>
+                      <div className="flex flex-wrap gap-2">
+                        {[1, 2, 3, 4, 5].map(l => (
+                          <button 
+                            key={l}
+                            type="button"
+                            onClick={() => { playSound('pop'); setLevel(l); }}
+                            className={`w-11 h-11 rounded-xl font-black transition-all border-4 tactile-button ${level === l ? 'bg-brand-blue border-blue-400 text-white shadow-lg' : (isDark ? 'bg-slate-800 border-slate-800 text-slate-500 hover:border-slate-700' : 'bg-white border-slate-50 text-slate-400 hover:border-blue-50')}`}
+                          >
+                            {l}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block">Extra Tags (comma separated)</label>
+                      <input 
+                        type="text" 
+                        value={tags} 
+                        onChange={(e) => setTags(e.target.value)}
+                        className={`w-full px-5 py-3 rounded-xl outline-none border-4 transition-all font-bold ${isDark ? 'bg-slate-800 border-slate-800 text-white focus:border-brand-purple' : 'bg-slate-50 border-slate-50 text-slate-700 focus:border-brand-blue'}`}
+                        placeholder="funny, cats, space"
+                      />
                     </div>
                   </div>
 
@@ -273,9 +315,7 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
             </div>
           ) : (
             <div className="h-full flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-200 overflow-hidden">
-              {/* Compact Editor Area */}
               <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0">
-                 {/* Current Page Illustration */}
                  <div className="lg:w-1/2 aspect-[4/3] lg:aspect-auto rounded-[2.5rem] border-4 border-dashed overflow-hidden relative group tactile-button shrink-0 shadow-inner">
                     <div 
                       onClick={() => pageImageInputRef.current?.click()}
@@ -307,7 +347,6 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
                     </button>
                  </div>
 
-                 {/* Current Page Text */}
                  <div className="flex-1 flex flex-col gap-3">
                     <div className="flex items-center justify-between px-2">
                       <label className="text-[10px] font-black text-brand-purple uppercase tracking-[0.2em]">Story Text (Page {activePageIndex + 1})</label>
@@ -322,7 +361,6 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
                  </div>
               </div>
 
-              {/* Enhanced Storyboard Strip */}
               <div className={`shrink-0 p-3 rounded-[2rem] border-4 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-white'}`}>
                 <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-1 px-1 snap-x">
                   {pages.map((p, idx) => (
@@ -357,7 +395,6 @@ const BookUploadModal: React.FC<BookUploadModalProps> = ({ isOpen, onClose, onUp
           )}
         </div>
 
-        {/* Footer Actions */}
         <div className={`p-6 sm:p-8 border-t-4 flex items-center justify-between gap-4 shrink-0 ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-50'}`}>
           <div className="flex-1 min-w-0">
             {error && <p className="text-red-500 text-xs font-bold animate-shake truncate">{error}</p>}

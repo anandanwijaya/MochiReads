@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
-import { Sparkles, Wand2, Loader2, BookOpen, Star, Rocket, Palette, RefreshCw, CheckCircle, ChevronLeft, Type as TypeIcon } from 'lucide-react';
+import { Sparkles, Wand2, Loader2, BookOpen, Star, Rocket, Palette, RefreshCw, CheckCircle, ChevronLeft, Type as TypeIcon, PawPrint, Atom, Compass, Scroll, Heart } from 'lucide-react';
 import { generateStory, generateIllustration } from '../services/geminiService';
-import { StoryGenerationResult, Book, AppLanguage } from '../types';
+import { StoryGenerationResult, Book, AppLanguage, Category } from '../types';
 import { playSound } from './SoundEffects';
 import { supabase, uploadImageFromBase64, getManualSession } from '../services/supabase';
 import { getTranslation } from '../i18n';
@@ -13,12 +12,24 @@ interface StoryGeneratorProps {
   theme: 'dark' | 'light';
 }
 
+const CATEGORIES: { id: Exclude<Category, 'All'>; icon: React.ReactNode; color: string }[] = [
+  { id: 'Animal Stories', icon: <PawPrint size={18} />, color: 'bg-brand-rose' },
+  { id: 'Science', icon: <Atom size={18} />, color: 'bg-brand-cyan' },
+  { id: 'Adventure', icon: <Compass size={18} />, color: 'bg-brand-amber' },
+  { id: 'Folk Tales', icon: <Scroll size={18} />, color: 'bg-brand-purple' },
+  { id: 'Life Skills', icon: <Heart size={18} />, color: 'bg-brand-pink' },
+];
+
 const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, language, theme }) => {
   const [prompt, setPrompt] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<Exclude<Category, 'All'>>('Adventure');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const t = (key: any) => getTranslation(language, key);
+  
+  // FIX: Moved isDark declaration to the top to avoid use-before-declaration error
+  const isDark = theme === 'dark';
   
   const [stage, setStage] = useState<'input' | 'review'>('input');
   const [storyData, setStoryData] = useState<StoryGenerationResult | null>(null);
@@ -33,7 +44,8 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
     playSound('pop');
     
     try {
-      const result = await generateStory(prompt, language);
+      const enhancedPrompt = `A ${selectedCategory.toLowerCase()} story: ${prompt}`;
+      const result = await generateStory(enhancedPrompt, language);
       setStoryData(result);
       setStage('review');
       
@@ -118,16 +130,16 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
           title: storyData.title,
           author: user.full_name || 'A Magic Author',
           illustrator: 'Gemini AI',
-          description: `A magical story created in the Lab based on: ${prompt}`,
+          description: `A magical ${selectedCategory.toLowerCase()} story created in the Lab based on: ${prompt}`,
           cover_image_url: finalImageUrls[0],
           cover_image_path: uploadedAssets[0].path,
           language: t('languageName'),
           level: 1,
-          tags: ['Magic Lab', 'AI Story', language.toUpperCase()],
+          tags: ['Magic Lab', 'AI Story', selectedCategory, language.toUpperCase()],
           pages: pagesText,
           page_images: finalImageUrls,
           is_public: true,
-          created_by: user.email // Ownership Tracking
+          created_by: user.email 
         }])
         .select()
         .single();
@@ -211,16 +223,24 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
                 <RefreshCw size={24} />
               </button>
             </div>
-            <div className="flex-1 w-full">
-              <label className="text-[12px] font-black text-slate-700 dark:text-slate-400 uppercase tracking-[0.4em] block mb-4 px-4">BOOK TITLE</label>
-              <input 
-                type="text"
-                value={storyData.title}
-                onChange={(e) => handleUpdateTitle(e.target.value)}
-                className={`text-4xl sm:text-6xl lg:text-7xl font-display font-black w-full rounded-[2rem] px-8 py-6 outline-none transition-all border-4 focus:border-brand-purple shadow-inner leading-tight ${
-                  theme === 'dark' ? 'bg-slate-800 border-transparent text-white' : 'bg-slate-100 border-transparent text-slate-950'
-                }`}
-              />
+            <div className="flex-1 w-full space-y-6">
+              <div>
+                <label className="text-[12px] font-black text-slate-700 dark:text-slate-400 uppercase tracking-[0.4em] block mb-4 px-4">BOOK TITLE</label>
+                <input 
+                  type="text"
+                  value={storyData.title}
+                  onChange={(e) => handleUpdateTitle(e.target.value)}
+                  className={`text-4xl sm:text-6xl lg:text-7xl font-display font-black w-full rounded-[2rem] px-8 py-6 outline-none transition-all border-4 focus:border-brand-purple shadow-inner leading-tight ${
+                    theme === 'dark' ? 'bg-slate-800 border-transparent text-white' : 'bg-slate-100 border-transparent text-slate-950'
+                  }`}
+                />
+              </div>
+              <div className="flex items-center gap-4 px-4">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">STORY CATEGORY:</span>
+                <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 ${isDark ? 'bg-slate-800 border-slate-700 text-brand-purple' : 'bg-brand-lavender border-brand-purple/20 text-brand-purple'}`}>
+                  {selectedCategory}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -233,7 +253,7 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
                   <span className="text-[12px] font-black text-slate-700 dark:text-slate-400 uppercase tracking-[0.4em] bg-slate-100 dark:bg-slate-800 px-5 py-2 rounded-full">PAGE {idx + 1}</span>
                   <button 
                     onClick={() => handleGenerateImage(idx, storyData.title + ": " + page.imagePrompt)}
-                    className="text-brand-purple hover:text-brand-violet transition-all flex items-center gap-2 text-[12px] font-black uppercase tracking-[0.3em] hover:scale-105"
+                    className="text-brand-purple hover:text-brand-violet transition-all flex items-center gap-2 text-[12px] font-black uppercase tracking-widest hover:scale-105"
                   >
                     <RefreshCw size={14} className={imageLoadingStates[idx] ? 'animate-spin' : ''} /> RE-GENERATE
                   </button>
@@ -299,25 +319,49 @@ const StoryGenerator: React.FC<StoryGeneratorProps> = ({ onStoryGenerated, langu
           Tell us a little bit about your hero, and our magic wand will write a whole book for you!
         </p>
 
-        <div className="relative mb-16 group w-full max-w-7xl mx-auto">
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="..."
-            className={`w-full h-72 p-10 sm:p-14 rounded-[3rem] border-4 outline-none text-2xl sm:text-4xl font-black resize-none transition-all shadow-inner leading-relaxed ${
-              theme === 'dark' 
-                ? 'bg-slate-800 border-slate-700 text-white focus:border-brand-purple' 
-                : 'bg-slate-100 border-slate-100 text-slate-950 focus:border-brand-blue focus:bg-white'
-            }`}
-            disabled={isGenerating}
-          />
-          <button
-            onClick={handleInitialGenerate}
-            disabled={isGenerating || !prompt.trim()}
-            className="absolute bottom-8 right-8 sm:bottom-12 sm:right-12 bg-brand-purple text-white px-10 py-5 rounded-[2rem] font-black shadow-[0_8px_0_0_#6d28d9] hover:bg-brand-violet active:translate-y-[8px] active:shadow-none transition-all disabled:opacity-50 flex items-center gap-4 text-2xl tracking-widest"
-          >
-            {isGenerating ? <><Loader2 size={28} className="animate-spin" /> MAGICKING...</> : <><Sparkles size={28} /> LETS GO!</>}
-          </button>
+        <div className="w-full max-w-7xl mx-auto mb-16 space-y-10">
+          <div className="text-left">
+            <label className="text-[12px] font-black text-brand-purple uppercase tracking-[0.4em] mb-4 block px-6">1. Choose a Story Genre</label>
+            <div className="flex flex-wrap justify-center gap-4">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => { playSound('pop'); setSelectedCategory(cat.id); }}
+                  className={`flex items-center gap-3 px-8 py-4 rounded-2xl border-4 transition-all font-black text-lg tactile-button ${
+                    selectedCategory === cat.id 
+                      ? `${isDark ? 'bg-brand-purple border-purple-400' : 'bg-brand-blue border-blue-200'} text-white shadow-xl scale-105` 
+                      : (isDark ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-white border-slate-100 text-slate-500')
+                  }`}
+                >
+                  {cat.icon}
+                  {cat.id}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative group">
+            <label className="text-left text-[12px] font-black text-brand-purple uppercase tracking-[0.4em] mb-4 block px-6">2. Describe your Adventure</label>
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="A brave kitten exploring a city made of cheese..."
+              className={`w-full h-72 p-10 sm:p-14 rounded-[3rem] border-4 outline-none text-2xl sm:text-4xl font-black resize-none transition-all shadow-inner leading-relaxed ${
+                theme === 'dark' 
+                  ? 'bg-slate-800 border-slate-700 text-white focus:border-brand-purple' 
+                  : 'bg-slate-100 border-slate-100 text-slate-950 focus:border-brand-blue focus:bg-white'
+              }`}
+              disabled={isGenerating}
+            />
+            <button
+              onClick={handleInitialGenerate}
+              disabled={isGenerating || !prompt.trim()}
+              className="absolute bottom-8 right-8 sm:bottom-12 sm:right-12 bg-brand-purple text-white px-10 py-5 rounded-[2rem] font-black shadow-[0_8px_0_0_#6d28d9] hover:bg-brand-violet active:translate-y-[8px] active:shadow-none transition-all disabled:opacity-50 flex items-center gap-4 text-2xl tracking-widest"
+            >
+              {isGenerating ? <><Loader2 size={28} className="animate-spin" /> MAGICKING...</> : <><Sparkles size={28} /> LETS GO!</>}
+            </button>
+          </div>
         </div>
 
         <div className="space-y-12">
