@@ -218,6 +218,22 @@ export const uploadImageFromBase64 = async (base64String: string, fileName: stri
   }
 };
 
+export const uploadFile = async (file: File, fileName: string): Promise<UploadResponse> => {
+  try {
+    const { data, error } = await supabase.storage
+      .from('images')
+      .upload(fileName, file, { cacheControl: '3600', upsert: true });
+    
+    if (error) throw error;
+    
+    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(data.path);
+    return { url: publicUrl, path: data.path };
+  } catch (err) {
+    console.error('File Upload Error:', err);
+    throw err;
+  }
+};
+
 export const uploadImageFromUrl = async (url: string, fileName: string, fallbackTitle: string = 'Story'): Promise<UploadResponse> => {
   try {
     const response = await fetch(url);

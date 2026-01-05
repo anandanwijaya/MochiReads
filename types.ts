@@ -7,6 +7,7 @@ export interface Book {
   description: string;
   coverImage: string;
   coverImagePath?: string;
+  pdfUrl?: string; // New field for PDF download link
   language: string;
   level: number;
   tags: string[];

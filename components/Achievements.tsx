@@ -57,7 +57,8 @@ const Achievements: React.FC<AchievementsProps> = ({ finishedCount, languageCoun
               <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 border-2 ${
                 isUnlocked ? 'bg-brand-lavender border-white shadow-inner' : 'bg-slate-200 border-slate-300'
               }`}>
-                {React.cloneElement(badge.icon as React.ReactElement, { size: 32 })}
+                {/* Added any type to React.Element to fix "Object literal may only specify known properties, and 'size' does not exist" error */}
+                {React.cloneElement(badge.icon as React.ReactElement<any>, { size: 32 })}
               </div>
               
               <h3 className={`font-display font-black text-lg mb-1 text-center leading-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>

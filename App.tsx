@@ -1,5 +1,5 @@
 
-import { BookOpen, Clock, Globe, Heart, Sparkles, TrendingUp, Trophy, Trash2, PenTool, Upload } from 'lucide-react';
+import { BookOpen, Clock, Globe, Heart, Sparkles, TrendingUp, Trophy, Trash2, PenTool, Upload, Loader2, FileDown } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AuthModal from './components/AuthModal';
 import BookGrid, { BookShelf } from './components/BookGrid';
@@ -21,6 +21,7 @@ import { AppLanguage, Book, Category, LanguageFilter, Level, ViewType } from './
 const App: React.FC = () => {
   const [view, setView] = useState<ViewType>('library');
   const [activeBook, setActiveBook] = useState<Book | null>(null);
+  const [shouldAutoPrint, setShouldAutoPrint] = useState(false);
   const [books, setBooks] = useState<Book[]>([]); 
   const [userCreatedBooks, setUserCreatedBooks] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,6 +29,7 @@ const App: React.FC = () => {
   const [selectedLevel, setSelectedLevel] = useState<Level>('All');
   const [selectedLanguageFilter, setSelectedLanguageFilter] = useState<LanguageFilter>('All');
   const [loading, setLoading] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const initialized = useRef(false);
   
@@ -47,13 +49,13 @@ const App: React.FC = () => {
   const t = useCallback((key: any) => getTranslation(language, key), [language]);
 
   useEffect(() => {
-    document.body.style.overflow = activeBook || isSeedViewOpen ? 'hidden' : 'unset';
-  }, [activeBook, isSeedViewOpen]);
+    document.body.style.overflow = activeBook || isSeedViewOpen || isDownloading ? 'hidden' : 'unset';
+  }, [activeBook, isSeedViewOpen, isDownloading]);
 
   const fetchBooks = useCallback(async (isInitial = false) => {
     if (isInitial) setLoading(true);
     try {
-      const { data, error } = await supabase.from('books').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('books').select('id, title, author, illustrator, description, cover_image_url, language, level, tags, pages, page_images, created_by, created_at').order('created_at', { ascending: false });
       if (error) throw error;
       if (data) {
         setBooks(data.map((b: any) => ({
@@ -140,6 +142,7 @@ const App: React.FC = () => {
 
   const handleReadBook = (book: Book) => {
     if (!user) { setIsAuthModalOpen(true); return; }
+    setShouldAutoPrint(false);
     setActiveBook(book);
     setLatestRead(prev => {
       const updated = [book.id, ...prev.filter(id => id !== book.id)].slice(0, 10);
@@ -172,6 +175,14 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleLogout = () => {
+    setUser(null);
+    setFavorites([]);
+    setReadingProgress([]);
+    setUserCreatedBooks([]);
+    setView('library');
+  };
+
   const filteredBySearch = useMemo(() => {
     if (!searchQuery) return books;
     const q = searchQuery.toLowerCase();
@@ -190,20 +201,33 @@ const App: React.FC = () => {
         <div className="w-24 h-24 bg-brand-purple rounded-[2.5rem] flex items-center justify-center animate-bounce-slow shadow-[0_20px_40px_rgba(124,58,237,0.3)] mb-10 border-4 border-white">
           <BookOpen size={48} className="text-white" strokeWidth={3} />
         </div>
-        <h2 className="text-3xl font-display font-black animate-pulse tracking-widest text-brand-purple uppercase">Brewing Magic Stories...</h2>
+        <h2 className="text-3xl font-display font-black animate-pulse tracking-widest text-brand-purple uppercase text-center px-6">Summoning Magic Library...</h2>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen transition-colors duration-500 flex flex-col w-full ${theme === 'dark' ? 'text-slate-100' : 'text-slate-900'}`}>
+    <div className={`min-h-screen transition-colors duration-500 flex flex-col w-full overflow-x-hidden ${theme === 'dark' ? 'text-slate-100' : 'text-slate-900'}`}>
       <Navbar 
         onNavigate={handleNavigate} onUploadClick={() => user ? setIsUploadModalOpen(true) : setIsAuthModalOpen(true)}
-        onSeedClick={triggerSeed} activeView={view} user={user} onLoginClick={() => setIsAuthModalOpen(true)}
+        onSeedClick={triggerSeed} activeView={view} user={user} onLogout={handleLogout} onLoginClick={() => setIsAuthModalOpen(true)}
         favoritesCount={favorites.length} theme={theme} toggleTheme={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
         language={language} setLanguage={setLanguage} searchQuery={searchQuery} setSearchQuery={setSearchQuery}
         books={books} onReadBook={handleReadBook}
       />
+
+      {isDownloading && (
+        <div className="fixed inset-0 z-[300] bg-brand-purple/90 backdrop-blur-xl flex flex-col items-center justify-center text-white p-10 animate-in fade-in duration-300">
+           <div className="relative mb-12">
+             <div className="absolute inset-0 bg-white/20 blur-3xl animate-pulse rounded-full" />
+             <div className="relative w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center text-brand-purple shadow-2xl border-4 border-white/50 animate-bounce-slow">
+               <FileDown size={64} strokeWidth={3} />
+             </div>
+           </div>
+           <h2 className="text-5xl font-display font-black mb-4 tracking-tight uppercase text-center">Preparing Magic PDF...</h2>
+           <p className="text-xl font-bold opacity-80 max-w-md text-center">Our story pixies are gathering the pages for your offline adventure!</p>
+        </div>
+      )}
 
       <div className="fixed top-28 left-6 sm:left-12 z-[60] pointer-events-none sm:pointer-events-auto transition-all duration-300">
         <button 
@@ -366,8 +390,9 @@ const App: React.FC = () => {
 
       {activeBook && (
         <BookReader 
-          book={activeBook} theme={theme} onClose={() => setActiveBook(null)} userId={user?.email}
+          book={activeBook} theme={theme} onClose={() => { setActiveBook(null); setShouldAutoPrint(false); }} userId={user?.email}
           initialPage={readingProgress.find(p => p.book_id === activeBook.id)?.current_page || 0}
+          autoPrint={shouldAutoPrint}
         />
       )}
 

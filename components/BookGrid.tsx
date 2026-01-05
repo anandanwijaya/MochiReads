@@ -6,6 +6,15 @@ import { Sparkles, Globe, Filter, PawPrint, Atom, Compass, Scroll, Heart, Layout
 import { playSound } from './SoundEffects';
 import { getTranslation } from '../i18n';
 
+// Added CATEGORY_META definition to fix "Cannot find name 'CATEGORY_META'" error.
+const CATEGORY_META = [
+  { id: 'Animal Stories', color: 'bg-brand-rose', image: 'https://loremflickr.com/300/300/animal,cute,cartoon?lock=1' },
+  { id: 'Science', color: 'bg-brand-cyan', image: 'https://loremflickr.com/300/300/science,space,cartoon?lock=2' },
+  { id: 'Adventure', color: 'bg-brand-amber', image: 'https://loremflickr.com/300/300/adventure,forest,cartoon?lock=3' },
+  { id: 'Folk Tales', color: 'bg-brand-purple', image: 'https://loremflickr.com/300/300/magic,fairy,cartoon?lock=4' },
+  { id: 'Life Skills', color: 'bg-brand-pink', image: 'https://loremflickr.com/300/300/family,friends,cartoon?lock=5' },
+];
+
 interface BookGridProps {
   books: Book[];
   onRead: (book: Book) => void;
@@ -22,14 +31,6 @@ interface BookGridProps {
   language: AppLanguage;
   user?: any;
 }
-
-const CATEGORY_META = [
-  { id: 'Animal Stories', icon: <PawPrint size={20} />, color: 'border-brand-rose', image: 'https://loremflickr.com/600/450/illustration,drawing,cartoon,animal,cute,storybook?lock=101' },
-  { id: 'Science', icon: <Atom size={20} />, color: 'border-brand-cyan', image: 'https://loremflickr.com/600/450/illustration,drawing,cartoon,space,rocket,science,kids?lock=202' },
-  { id: 'Adventure', icon: <Compass size={20} />, color: 'border-brand-amber', image: 'https://loremflickr.com/600/450/illustration,drawing,cartoon,adventure,map,explorer?lock=303' },
-  { id: 'Folk Tales', icon: <Scroll size={20} />, color: 'border-brand-purple', image: 'https://loremflickr.com/600/450/illustration,drawing,cartoon,fairytale,castle,magic?lock=404' },
-  { id: 'Life Skills', icon: <Heart size={20} />, color: 'border-brand-pink', image: 'https://loremflickr.com/600/450/illustration,drawing,cartoon,friendship,sharing,kids?lock=505' },
-];
 
 export const BookShelf: React.FC<{
   title: string;
@@ -59,7 +60,8 @@ export const BookShelf: React.FC<{
       <div className="flex items-center justify-between px-6 sm:px-12">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-brand-purple text-white rounded-2xl shadow-[0_10px_20px_-5px_rgba(124,58,237,0.4)] border-2 border-white/20">
-            {icon ? React.cloneElement(icon as React.ReactElement, { size: 22 }) : <Sparkles size={22} />}
+            {/* Added any type to React.Element to fix "Object literal may only specify known properties, and 'size' does not exist" error */}
+            {icon ? React.cloneElement(icon as React.ReactElement<any>, { size: 22 }) : <Sparkles size={22} />}
           </div>
           <h3 className={`text-3xl font-display font-black tracking-tight ${isDark ? 'text-white' : 'text-brand-violet'}`}>
             {title}
@@ -81,7 +83,12 @@ export const BookShelf: React.FC<{
       >
         {books.map((book) => (
           <div key={book.id} className="w-[300px] sm:w-[340px] flex-shrink-0 snap-start">
-            <BookCard book={book} onRead={onRead} isFavorite={favorites.includes(book.id)} onToggleFavorite={onToggleFavorite} />
+            <BookCard 
+              book={book} 
+              onRead={onRead} 
+              isFavorite={favorites.includes(book.id)} 
+              onToggleFavorite={onToggleFavorite} 
+            />
           </div>
         ))}
       </div>
@@ -90,7 +97,7 @@ export const BookShelf: React.FC<{
 };
 
 const BookGrid: React.FC<BookGridProps> = ({ 
-  books, onRead, 
+  books, onRead,
   selectedCategory = 'All', setSelectedCategory = (_c: Category) => {},
   selectedLevel = 'All', setSelectedLevel = (_l: Level) => {}, 
   selectedLanguageFilter = 'All', setSelectedLanguageFilter = (_f: LanguageFilter) => {},
@@ -200,7 +207,12 @@ const BookGrid: React.FC<BookGridProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-10">
             {filteredBooks.map((book, idx) => (
               <div key={book.id} className="animate-in fade-in slide-up duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
-                <BookCard book={book} onRead={onRead} isFavorite={favorites.includes(book.id)} onToggleFavorite={onToggleFavorite} />
+                <BookCard 
+                  book={book} 
+                  onRead={onRead} 
+                  isFavorite={favorites.includes(book.id)} 
+                  onToggleFavorite={onToggleFavorite} 
+                />
               </div>
             ))}
           </div>
