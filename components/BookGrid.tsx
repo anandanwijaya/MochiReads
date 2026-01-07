@@ -28,31 +28,31 @@ const CATEGORY_META = [
 		id: 'Animal Stories',
 		icon: <PawPrint size={20} />,
 		color: 'border-brand-rose',
-		image: '../public/animal.jpg',
+		image: '/animal.jpg',
 	},
 	{
 		id: 'Science',
 		icon: <Atom size={20} />,
 		color: 'border-brand-cyan',
-		image: '../public/science.jpg',
+		image: '/science.jpg',
 	},
 	{
 		id: 'Adventure',
 		icon: <Compass size={20} />,
 		color: 'border-brand-amber',
-		image: '../public/adventure.jpg',
+		image: '/adventure.jpg',
 	},
 	{
 		id: 'Folk Tales',
 		icon: <Scroll size={20} />,
 		color: 'border-brand-purple',
-		image: '../public/folk-tales.png',
+		image: '/folk-tales.png',
 	},
 	{
 		id: 'Life Skills',
 		icon: <Heart size={20} />,
 		color: 'border-brand-pink',
-		image: '../public/fantasy.jpg',
+		image: '/fantasy.jpg',
 	},
 ]
 
