@@ -16,7 +16,7 @@ const Hero: React.FC<HeroProps> = ({ onStartCreating, language, theme }) => {
   const isDark = theme === 'dark';
 
   return (
-    <div className="relative overflow-hidden min-h-[90vh] flex flex-col items-center justify-center w-full px-6 py-12 sm:py-24">
+    <div className="relative overflow-hidden min-h-[90vh] flex flex-col items-center justify-center w-full px-6 py-12 sm:py-24 -mt-4">
       {/* Dynamic Aesthetic Background Blobs - Clipped by overflow-hidden */}
       <div className="absolute top-[-10%] left-[-5%] w-[60vw] h-[60vw] bg-brand-purple/10 blur-[120px] animate-morph pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-5%] w-[60vw] h-[60vw] bg-brand-pink/10 blur-[120px] animate-morph animation-delay-2000 pointer-events-none" />

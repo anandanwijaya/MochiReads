@@ -6,15 +6,6 @@ import { Sparkles, Globe, Filter, PawPrint, Atom, Compass, Scroll, Heart, Layout
 import { playSound } from './SoundEffects';
 import { getTranslation } from '../i18n';
 
-// Added CATEGORY_META definition to fix "Cannot find name 'CATEGORY_META'" error.
-const CATEGORY_META = [
-  { id: 'Animal Stories', color: 'bg-brand-rose', image: 'https://loremflickr.com/300/300/animal,cute,cartoon?lock=1' },
-  { id: 'Science', color: 'bg-brand-cyan', image: 'https://loremflickr.com/300/300/science,space,cartoon?lock=2' },
-  { id: 'Adventure', color: 'bg-brand-amber', image: 'https://loremflickr.com/300/300/adventure,forest,cartoon?lock=3' },
-  { id: 'Folk Tales', color: 'bg-brand-purple', image: 'https://loremflickr.com/300/300/magic,fairy,cartoon?lock=4' },
-  { id: 'Life Skills', color: 'bg-brand-pink', image: 'https://loremflickr.com/300/300/family,friends,cartoon?lock=5' },
-];
-
 interface BookGridProps {
   books: Book[];
   onRead: (book: Book) => void;
@@ -31,6 +22,39 @@ interface BookGridProps {
   language: AppLanguage;
   user?: any;
 }
+
+const CATEGORY_META = [
+	{
+		id: 'Animal Stories',
+		icon: <PawPrint size={20} />,
+		color: 'border-brand-rose',
+		image: '../public/animal.jpg',
+	},
+	{
+		id: 'Science',
+		icon: <Atom size={20} />,
+		color: 'border-brand-cyan',
+		image: '../public/science.jpg',
+	},
+	{
+		id: 'Adventure',
+		icon: <Compass size={20} />,
+		color: 'border-brand-amber',
+		image: '../public/adventure.jpg',
+	},
+	{
+		id: 'Folk Tales',
+		icon: <Scroll size={20} />,
+		color: 'border-brand-purple',
+		image: '../public/folk-tales.png',
+	},
+	{
+		id: 'Life Skills',
+		icon: <Heart size={20} />,
+		color: 'border-brand-pink',
+		image: '../public/fantasy.jpg',
+	},
+]
 
 export const BookShelf: React.FC<{
   title: string;
@@ -60,8 +84,7 @@ export const BookShelf: React.FC<{
       <div className="flex items-center justify-between px-6 sm:px-12">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-brand-purple text-white rounded-2xl shadow-[0_10px_20px_-5px_rgba(124,58,237,0.4)] border-2 border-white/20">
-            {/* Added any type to React.Element to fix "Object literal may only specify known properties, and 'size' does not exist" error */}
-            {icon ? React.cloneElement(icon as React.ReactElement<any>, { size: 22 }) : <Sparkles size={22} />}
+            {icon ? React.cloneElement(icon as React.ReactElement, { size: 22 }) : <Sparkles size={22} />}
           </div>
           <h3 className={`text-3xl font-display font-black tracking-tight ${isDark ? 'text-white' : 'text-brand-violet'}`}>
             {title}
@@ -82,13 +105,8 @@ export const BookShelf: React.FC<{
         className="flex gap-8 overflow-x-auto no-scrollbar px-6 sm:px-12 pb-8 snap-x snap-mandatory"
       >
         {books.map((book) => (
-          <div key={book.id} className="w-[300px] sm:w-[340px] flex-shrink-0 snap-start">
-            <BookCard 
-              book={book} 
-              onRead={onRead} 
-              isFavorite={favorites.includes(book.id)} 
-              onToggleFavorite={onToggleFavorite} 
-            />
+          <div key={book.id} className="w-[300px] sm:w-[340px] snap-start">
+            <BookCard book={book} onRead={onRead} isFavorite={favorites.includes(book.id)} onToggleFavorite={onToggleFavorite} />
           </div>
         ))}
       </div>
@@ -97,7 +115,7 @@ export const BookShelf: React.FC<{
 };
 
 const BookGrid: React.FC<BookGridProps> = ({ 
-  books, onRead,
+  books, onRead, 
   selectedCategory = 'All', setSelectedCategory = (_c: Category) => {},
   selectedLevel = 'All', setSelectedLevel = (_l: Level) => {}, 
   selectedLanguageFilter = 'All', setSelectedLanguageFilter = (_f: LanguageFilter) => {},
@@ -122,19 +140,42 @@ const BookGrid: React.FC<BookGridProps> = ({
     <section className="w-full pb-32">
       {!hideFilters && (
         <div className="w-full px-6 sm:px-12 mb-16 space-y-10 animate-in slide-up duration-500">
-          <div className="flex overflow-x-auto no-scrollbar gap-6 pb-2">
+          <div className="flex flex-row items-center gap-4 ps-4">
+            <LayoutGrid className="text-brand-purple" size={24} />
+            <h4 className={`text-3xl font-display font-black ${isDark ? 'text-white' : 'text-brand-violet'}`}>
+              Categories ({CATEGORY_META.length})
+            </h4>
+          </div>
+          <div className="flex justify-evenly overflow-x-auto no-scrollbar gap-6 pb-2 py-4">
             {CATEGORY_META.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => { playSound('pop'); setSelectedCategory(cat.id as Category); }}
-                className={`group flex flex-col items-center min-w-[130px] transition-all duration-300 ${selectedCategory === cat.id ? 'scale-110' : 'hover:scale-105'}`}
+                className={`group flex flex-col items-center min-w-[130px] transition-all duration-300 ${
+                  selectedCategory === cat.id ? 'scale-110' : 'hover:scale-105'
+                }`}
               >
-                <div className={`w-full aspect-square rounded-[2.5rem] overflow-hidden mb-4 border-4 transition-all ${
-                  selectedCategory === cat.id ? `${cat.color} shadow-2xl scale-100 ring-4 ring-brand-purple/20` : 'border-white dark:border-slate-800 shadow-lg grayscale-[40%] opacity-80'
-                }`}>
-                  <img src={cat.image} className="w-full h-full object-cover" alt={cat.id} />
+                <div
+                  className={`
+                    w-[150px] md:w-[180px] aspect-square rounded-[2rem] overflow-hidden mb-4 border-4 transition-all flex justify-center items-center bg-gradient-to-tr from-purple-200 to-purple-100
+                    ${selectedCategory === cat.id
+                      ? `${cat.color} shadow-2xl ring-4 ring-brand-purple/20`
+                      : 'border-white dark:border-slate-800 shadow-lg grayscale-[30%] opacity-90'
+                    }
+                  `}
+                >
+                  <img
+                    src={cat.image}
+                    alt={cat.id}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
                 </div>
-                <span className={`text-[12px] font-black uppercase tracking-[0.3em] text-center px-2 py-1 rounded-lg transition-all ${selectedCategory === cat.id ? 'bg-brand-purple text-white shadow-md' : 'text-slate-400'}`}>
+                <span
+                  className={`
+                    text-[12px] font-black uppercase tracking-[0.3em] text-center px-2 py-1 rounded-lg transition-all
+                    ${selectedCategory === cat.id ? 'bg-brand-purple text-white shadow-md' : 'text-slate-500'}
+                  `}
+                >
                   {cat.id}
                 </span>
               </button>
@@ -189,7 +230,7 @@ const BookGrid: React.FC<BookGridProps> = ({
         <div className="flex items-center justify-between mb-10 px-4">
            <div className="flex items-center gap-4">
               <LayoutGrid className="text-brand-purple" size={24} />
-              <h4 className={`text-2xl font-display font-black ${isDark ? 'text-white' : 'text-brand-violet'}`}>
+              <h4 className={`text-3xl font-display font-black ${isDark ? 'text-white' : 'text-brand-violet'}`}>
                 {filteredBooks.length > 0 ? `Magic Results (${filteredBooks.length})` : 'Summoning Stories...'}
               </h4>
            </div>
@@ -207,12 +248,7 @@ const BookGrid: React.FC<BookGridProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-10">
             {filteredBooks.map((book, idx) => (
               <div key={book.id} className="animate-in fade-in slide-up duration-500" style={{ animationDelay: `${idx * 50}ms` }}>
-                <BookCard 
-                  book={book} 
-                  onRead={onRead} 
-                  isFavorite={favorites.includes(book.id)} 
-                  onToggleFavorite={onToggleFavorite} 
-                />
+                <BookCard book={book} onRead={onRead} isFavorite={favorites.includes(book.id)} onToggleFavorite={onToggleFavorite} />
               </div>
             ))}
           </div>

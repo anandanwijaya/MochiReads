@@ -28,7 +28,7 @@ const languageNames: Record<AppLanguage, string> = {
 };
 
 export const generateStory = async (prompt: string, lang: AppLanguage = 'en'): Promise<StoryGenerationResult> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: 'AIzaSyAs5gLKoAoWKL7n_AexASBkynCTZfO7Krs' });
   const targetLang = languageNames[lang] || 'English';
 
   const response = await ai.models.generateContent({
@@ -65,7 +65,7 @@ export const generateStory = async (prompt: string, lang: AppLanguage = 'en'): P
 };
 
 export const generateIllustration = async (visualPrompt: string): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: 'AIzaSyAs5gLKoAoWKL7n_AexASBkynCTZfO7Krs' });
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
     contents: {
