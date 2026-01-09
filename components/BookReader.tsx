@@ -154,6 +154,13 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
     setCurrentPage(prev => Math.max(prev - 1, 0));
   };
 
+  useEffect(() => {
+  if (autoPrint) {
+    alert('Click Save PDF to download');
+  }
+}, [autoPrint]);
+
+
   const handlePrint = () => {
     playSound('pop');
     window.print();
@@ -182,7 +189,7 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
 
   const printRoot = document.getElementById('print-root');
   const printPortalContent = printRoot ? createPortal(
-    <div className="print-magic-container">
+    <div className="print-magic-container pointer-events-none">
       <div className="print-page-break">
         <h1 className="print-cover-title">{book.title}</h1>
         <p className="print-author">Created by {book.author}</p>
@@ -237,6 +244,7 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
           >
             <Music size={20} className={isAmbianceActive ? 'animate-pulse' : ''} />
           </button>
+
           {hasText && (
             <button 
               onClick={toggleReading} 
@@ -246,6 +254,9 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
               {isReadingAloud ? <VolumeX size={20} /> : <Volume2 size={20} />}
             </button>
           )}
+          <button onClick={handlePrint} className={`hidden md:flex items-center gap-3 px-6 py-2.5 rounded-xl font-black text-[10px] border-2 transition-all tactile-button ${isDark ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-950'}`}>
+            <Download size={16} /> <span className="tracking-widest uppercase">Save PDF</span>
+          </button>
         </div>
       </header>
 
@@ -308,9 +319,7 @@ const BookReader: React.FC<BookReaderProps> = ({ book, theme, onClose, userId, i
               {currentPage + 1} / {totalPages}
             </span>
           </div>
-          <button onClick={handlePrint} className={`hidden md:flex items-center gap-3 px-6 py-2.5 rounded-xl font-black text-[10px] border-2 transition-all tactile-button ${isDark ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-950'}`}>
-            <Download size={16} /> <span className="tracking-widest uppercase">Save PDF</span>
-          </button>
+
         </div>
       </footer>
     </div>
